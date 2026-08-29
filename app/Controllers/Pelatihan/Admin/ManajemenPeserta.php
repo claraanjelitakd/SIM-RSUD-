@@ -955,6 +955,7 @@ class ManajemenPeserta extends BaseController
 
         $data = [
             'title' => 'Monitoring Presensi',
+            'hide_default_breadcrumb' => true,
             'pelatihan' => $pelatihan,
             'sesi_list' => $sesi_list,
             'peserta' => $peserta
@@ -1331,6 +1332,134 @@ class ManajemenPeserta extends BaseController
             
             $row++;
         }
+
+        // === SHEET 3: DATA FEEDBACK ===
+        $sheet3 = $spreadsheet->createSheet();
+        $sheet3->setTitle('Data Feedback');
+
+        // Fetch data
+        $totalRating = 0;
+        $countFb = 0;
+        $feedbacks = [];
+        foreach ($peserta as $pl) {
+            $saran = $db->table('peserta_kuesioner_saran_pelatihan')
+                        ->where('peserta_pelat_id', $pl['id'])
+                        ->get()->getRowArray();
+            if ($saran) {
+                $rating = $saran['rating_umum'];
+                $komentar = $saran['saran_masukan'];
+                
+                $jawaban = $db->table('peserta_kuesioner_rating_pelatihan')
+                              ->select('kuesioner_id, nilai_rating')
+                              ->where('peserta_pelat_id', $pl['id'])
+                              ->get()->getResultArray();
+                $jawabanMap = [];
+                foreach ($jawaban as $j) {
+                    $jawabanMap[$j['kuesioner_id']] = $j['nilai_rating'];
+                }
+
+                $feedbacks[] = [
+                    'nama' => $pl['nama'],
+                    'rating' => $rating,
+                    'komentar' => $komentar,
+                    'jawaban_map' => $jawabanMap
+                ];
+                $totalRating += $rating;
+                $countFb++;
+            }
+        }
+        $avgFb = $countFb > 0 ? round($totalRating / $countFb, 1) : 0;
+
+        $questions = $db->table('kuesioner_master_pelatihan')
+            ->select('kuesioner_master_pelatihan.*, kategori_evaluasi_pelatihan.nama_kategori as kategori')
+            ->join('kategori_evaluasi_pelatihan', 'kategori_evaluasi_pelatihan.id = kuesioner_master_pelatihan.kategori_id', 'left')
+            ->where('pelatihan_id', $pelatihanId)
+            ->get()->getResultArray();
+
+        // 1. Overall Summary
+        $sheet3->setCellValue('A1', 'SUMMARY FEEDBACK PELATIHAN');
+        $sheet3->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        
+        $sheet3->setCellValue('A3', 'Total Responden');
+        $sheet3->setCellValue('B3', $countFb . ' Orang');
+        
+        $sheet3->setCellValue('A4', 'Rata-rata Rating Keseluruhan');
+        $sheet3->setCellValue('B4', $avgFb . ' / 5.0');
+        $sheet3->getStyle('A3:A4')->getFont()->setBold(true);
+
+        // 2. Average per Category / Question
+        $rowF = 6;
+        $sheet3->setCellValue('A'.$rowF, 'Rata-rata per Pertanyaan');
+        $sheet3->getStyle('A'.$rowF)->getFont()->setBold(true);
+        $rowF++;
+        
+        $sheet3->setCellValue('A'.$rowF, 'Kategori');
+        $sheet3->setCellValue('B'.$rowF, 'Pertanyaan');
+        $sheet3->setCellValue('C'.$rowF, 'Rata-rata Rating');
+        $sheet3->getStyle('A'.$rowF.':C'.$rowF)->getFont()->setBold(true);
+        $rowF++;
+
+        $qOrder = []; // Store question IDs to map columns later
+        foreach ($questions as $q) {
+            $qOrder[] = $q['id'];
+            
+            $ratingStat = $db->table('peserta_kuesioner_rating_pelatihan')
+                ->selectAvg('nilai_rating')
+                ->where('kuesioner_id', $q['id'])
+                ->get()->getRowArray();
+            $qAvg = $ratingStat['nilai_rating'] ? round($ratingStat['nilai_rating'], 1) : 0;
+
+            $sheet3->setCellValue('A'.$rowF, $q['kategori'] ?? 'Lainnya');
+            $sheet3->setCellValue('B'.$rowF, $q['pertanyaan']);
+            $sheet3->setCellValue('C'.$rowF, $qAvg);
+            $rowF++;
+        }
+        
+        $sheet3->getColumnDimension('B')->setWidth(50);
+        $sheet3->getColumnDimension('C')->setWidth(20);
+
+        // 3. Detail Per Peserta
+        $rowF += 2;
+        $sheet3->setCellValue('A'.$rowF, 'DETAIL FEEDBACK PER PESERTA');
+        $sheet3->getStyle('A'.$rowF)->getFont()->setBold(true)->setSize(12);
+        $rowF++;
+
+        // Headers for detail table
+        $sheet3->setCellValue('A'.$rowF, 'No');
+        $sheet3->setCellValue('B'.$rowF, 'Nama Peserta');
+        $sheet3->setCellValue('C'.$rowF, 'Rating Umum');
+        $sheet3->setCellValue('D'.$rowF, 'Saran & Masukan');
+        
+        // Multi-letter column logic for dynamic columns (up to ZZZ if needed, though unlikely)
+        $col = 'E';
+        foreach ($questions as $q) {
+            $sheet3->setCellValue($col.$rowF, $q['pertanyaan']);
+            $sheet3->getColumnDimension($col)->setWidth(30);
+            $col++;
+        }
+        
+        $sheet3->getStyle('A'.$rowF.':'.$col.$rowF)->getFont()->setBold(true);
+        
+        $rowF++;
+        $noF = 1;
+        foreach ($feedbacks as $fb) {
+            $sheet3->setCellValue('A'.$rowF, $noF++);
+            $sheet3->setCellValue('B'.$rowF, $fb['nama']);
+            $sheet3->setCellValue('C'.$rowF, $fb['rating']);
+            $sheet3->setCellValue('D'.$rowF, $fb['komentar']);
+            
+            $cCol = 'E';
+            foreach ($qOrder as $qid) {
+                $val = $fb['jawaban_map'][$qid] ?? '-';
+                $sheet3->setCellValue($cCol.$rowF, $val);
+                $cCol++;
+            }
+            $rowF++;
+        }
+        
+        $sheet3->getColumnDimension('A')->setAutoSize(true);
+        $sheet3->getColumnDimension('B')->setAutoSize(true);
+        $sheet3->getColumnDimension('D')->setWidth(40);
 
         $spreadsheet->setActiveSheetIndex(0);
 

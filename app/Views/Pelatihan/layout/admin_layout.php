@@ -548,12 +548,14 @@
                 <button class="btn-sidebar-toggle me-3" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
                 <div>
                     <h4 class="fw-bold mb-0 text-dark"><?= $title ?></h4>
+                    <?php if (!isset($hide_default_breadcrumb) || !$hide_default_breadcrumb): ?>
                     <nav aria-label="breadcrumb">
                         <ol class="breadcrumb mb-0" style="font-size: 0.75rem;">
                             <li class="breadcrumb-item"><a href="<?= site_url('pelatihan/admin/dashboard') ?>" class="text-decoration-none text-muted">Admin</a></li>
                             <li class="breadcrumb-item active" aria-current="page"><?= $title ?></li>
                         </ol>
                     </nav>
+                    <?php endif; ?>
                 </div>
             </div>
             <div class="header-controls d-flex gap-3 align-items-center">
