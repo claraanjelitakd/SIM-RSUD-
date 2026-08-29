@@ -7,84 +7,95 @@ $req = $req ?? [];
 
 <?= $this->section('content') ?>
 
-<div class="pt-1 glass-wrapper-global">
+<div class="glass-wrapper-global">
     <!-- Header Section -->
     <div class="mb-4 animate__animated animate__fadeIn">
-        <h3 class="fw-bold mb-1 text-white"><i class="fas fa-graduation-cap me-2 text-warning"></i> Program Diklat & Pelatihan</h3>
-        <p class="text-white opacity-75 mb-0 fw-medium">Temukan dan ikuti program pelatihan terbaik untuk meningkatkan kompetensi dan profesionalitas Anda.</p>
+        <h3 class="fw-bold mb-3 text-white">Program Diklat & Pelatihan</h3>
+        <div class="highlight-bounce mt-2 d-inline-block">
+            <span class="badge bg-warning text-dark px-3 py-2 fw-bold shadow-sm" style="font-size: 0.9rem;">
+                <i class="fas fa-sparkles me-1 text-danger"></i> Temukan dan ikuti program pelatihan terbaik untuk meningkatkan kompetensi dan profesionalitas Anda.
+            </span>
+        </div>
     </div>
 
 
     <!-- Filter & Search Section -->
     <div class="glass-card-global mb-4">
-        <div class="p-4">
-            <form id="filterForm" onsubmit="event.preventDefault();">
-                <div class="row g-3">
-                    <div class="col-md-4">
-                        <label class="form-label small fw-bold text-muted">Pencarian</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-white border-end-0"><i class="fas fa-search text-muted"></i></span>
-                            <input type="text" name="search" id="searchInput" class="form-control border-start-0 ps-0" placeholder="Cari nama pelatihan..." value="<?= $req['search'] ?? '' ?>" oninput="filterCourses()">
+        <div class="p-3 p-md-4">
+            <!-- Mobile Toggle Button -->
+            <button class="btn btn-outline-light w-100 d-md-none fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#filterCollapse" aria-expanded="false" aria-controls="filterCollapse">
+                <i class="fas fa-filter me-2"></i> Tampilkan Filter Pencarian
+            </button>
+            
+            <div class="collapse d-md-block mt-3 mt-md-0" id="filterCollapse">
+                <form id="filterForm" onsubmit="event.preventDefault();">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold text-muted">Pencarian</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0"><i class="fas fa-search text-muted"></i></span>
+                                <input type="text" name="search" id="searchInput" class="form-control border-start-0 ps-0" placeholder="Cari nama pelatihan..." value="<?= $req['search'] ?? '' ?>" oninput="filterCourses()">
+                            </div>
                         </div>
-                    </div>
-                    <div class="col-md-2">
-                        <label class="form-label small fw-bold text-muted">Program</label>
-                        <select id="programFilter" class="form-select shadow-none" onchange="filterCourses()">
-                            <option value="">Semua</option>
-                            <?php foreach($filters['program'] as $f): ?>
-                                <option value="<?= $f['program'] ?>" <?= isset($req['program']) && $req['program'] == $f['program'] ? 'selected' : '' ?>><?= $f['program'] ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <label class="form-label small fw-bold text-muted">Kategori</label>
-                        <select id="kategoriFilter" class="form-select shadow-none" onchange="filterCourses()">
-                            <option value="">Semua</option>
-                            <?php foreach($filters['kategori'] as $f): ?>
-                                <option value="<?= $f['kategori'] ?>" <?= isset($req['kategori']) && $req['kategori'] == $f['kategori'] ? 'selected' : '' ?>><?= $f['kategori'] ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <label class="form-label small fw-bold text-muted">Mekanisme</label>
-                        <select id="mekanismeFilter" class="form-select shadow-none" onchange="filterCourses()">
-                            <option value="">Semua</option>
-                            <?php foreach($filters['mekanisme'] as $f): ?>
-                                <option value="<?= $f['mekanisme'] ?>" <?= isset($req['mekanisme']) && $req['mekanisme'] == $f['mekanisme'] ? 'selected' : '' ?>><?= $f['mekanisme'] ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <label class="form-label small fw-bold text-white opacity-75">Target Profesi</label>
-                        <div class="dropdown">
-                            <button class="btn btn-dark form-select shadow-none text-start text-truncate" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="border-radius: 0.375rem; border: 1px solid rgba(255,255,255,0.2);" id="sasaranDropdownBtn">
-                                Pilih Profesi
-                            </button>
-                            <ul class="dropdown-menu w-100 p-2 shadow-sm" style="max-height: 250px; overflow-y: auto;" id="sasaranDropdownMenu">
-                                <?php
-                                $selectedSasaran = isset($req['sasaran']) && is_array($req['sasaran']) ? $req['sasaran'] : [];
-                                foreach($filters['profesi'] as $prof): 
-                                    $isChecked = in_array($prof['nama_profesi'], $selectedSasaran) ? 'checked' : '';
-                                ?>
-                                    <li>
-                                        <div class="form-check">
-                                            <input class="form-check-input sasaran-checkbox" type="checkbox" value="<?= $prof['nama_profesi'] ?>" id="profesi_<?= $prof['id'] ?>" onchange="updateSasaranBtn(); filterCourses();" <?= $isChecked ?>>
-                                            <label class="form-check-label" for="profesi_<?= $prof['id'] ?>">
-                                                <?= $prof['nama_profesi'] ?>
-                                            </label>
-                                        </div>
-                                    </li>
+                        <div class="col-md-2">
+                            <label class="form-label small fw-bold text-muted">Program</label>
+                            <select id="programFilter" class="form-select shadow-none" onchange="filterCourses()">
+                                <option value="">Semua</option>
+                                <?php foreach($filters['program'] as $f): ?>
+                                    <option value="<?= $f['program'] ?>" <?= isset($req['program']) && $req['program'] == $f['program'] ? 'selected' : '' ?>><?= $f['program'] ?></option>
                                 <?php endforeach; ?>
-                            </ul>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label small fw-bold text-muted">Kategori</label>
+                            <select id="kategoriFilter" class="form-select shadow-none" onchange="filterCourses()">
+                                <option value="">Semua</option>
+                                <?php foreach($filters['kategori'] as $f): ?>
+                                    <option value="<?= $f['kategori'] ?>" <?= isset($req['kategori']) && $req['kategori'] == $f['kategori'] ? 'selected' : '' ?>><?= $f['kategori'] ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label small fw-bold text-muted">Mekanisme</label>
+                            <select id="mekanismeFilter" class="form-select shadow-none" onchange="filterCourses()">
+                                <option value="">Semua</option>
+                                <?php foreach($filters['mekanisme'] as $f): ?>
+                                    <option value="<?= $f['mekanisme'] ?>" <?= isset($req['mekanisme']) && $req['mekanisme'] == $f['mekanisme'] ? 'selected' : '' ?>><?= $f['mekanisme'] ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label small fw-bold text-white opacity-75">Target Profesi</label>
+                            <div class="dropdown">
+                                <button class="btn btn-dark form-select shadow-none text-start text-truncate" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="border-radius: 0.375rem; border: 1px solid rgba(255,255,255,0.2);" id="sasaranDropdownBtn">
+                                    Pilih Profesi
+                                </button>
+                                <ul class="dropdown-menu w-100 p-2 shadow-sm" style="max-height: 250px; overflow-y: auto;" id="sasaranDropdownMenu">
+                                    <?php
+                                    $selectedSasaran = isset($req['sasaran']) && is_array($req['sasaran']) ? $req['sasaran'] : [];
+                                    foreach($filters['profesi'] as $prof): 
+                                        $isChecked = in_array($prof['nama_profesi'], $selectedSasaran) ? 'checked' : '';
+                                    ?>
+                                        <li>
+                                            <div class="form-check">
+                                                <input class="form-check-input sasaran-checkbox" type="checkbox" value="<?= $prof['nama_profesi'] ?>" id="profesi_<?= $prof['id'] ?>" onchange="updateSasaranBtn(); filterCourses();" <?= $isChecked ?>>
+                                                <label class="form-check-label" for="profesi_<?= $prof['id'] ?>">
+                                                    <?= $prof['nama_profesi'] ?>
+                                                </label>
+                                            </div>
+                                        </li>
+                                    <?php endforeach; ?>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="col-12 text-end mt-3">
+                            <a href="<?= base_url('pelatihan/peserta/pembelajaran') ?>" class="btn btn-light text-danger fw-bold rounded-pill px-4 me-2">Reset</a>
+                            <!-- Removed submit button -->
                         </div>
                     </div>
-                    
-                    <div class="col-12 text-end mt-3">
-                        <a href="<?= base_url('pelatihan/peserta/pembelajaran') ?>" class="btn btn-light text-danger fw-bold rounded-pill px-4 me-2">Reset</a>
-                        <!-- Removed submit button -->
-                    </div>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
     </div>
 
@@ -185,9 +196,10 @@ $req = $req ?? [];
 
 <style>
 .hover-card-premium:hover { 
-    border-color: #ce2127 !important; 
+    border-color: rgba(255,255,255,0.5) !important; 
     transform: translateY(-10px); 
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08) !important; 
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15) !important; 
+    background: rgba(255,255,255,0.15) !important;
 }
 .hover-card-premium:hover .btn-select {
     background: #ce2127 !important;
@@ -207,7 +219,14 @@ $req = $req ?? [];
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #0f172a 0%, #f59e0b 100%);
+    background: linear-gradient(135deg, #0a0a0a 0%, #ce2127 100%);
+}
+@keyframes bounceHighlight {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+.highlight-bounce {
+    animation: bounceHighlight 2s infinite ease-in-out;
 }
 </style>
 

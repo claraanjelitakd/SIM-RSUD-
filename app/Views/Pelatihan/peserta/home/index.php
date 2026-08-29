@@ -82,17 +82,37 @@
     /* Animations */
     .animate-fade { animation: fadeIn 0.6s ease-out forwards; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+    @keyframes bounce-welcome {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-8px); }
+    }
+    .animate-bounce-welcome {
+        display: inline-block;
+        animation: bounce-welcome 2s ease-in-out infinite;
+    }
+    @keyframes wave-hand {
+        0%, 100% { transform: rotate(0deg); }
+        25% { transform: rotate(15deg); }
+        50% { transform: rotate(-10deg); }
+        75% { transform: rotate(15deg); }
+    }
+    .animate-wave {
+        display: inline-block;
+        animation: wave-hand 2s ease-in-out infinite;
+        transform-origin: 70% 70%;
+    }
 </style>
 
-<div class="pt-1 glass-wrapper-global">
+<div class="glass-wrapper-global">
     <div class="row g-4">
         <!-- LEFT COLUMN (70%) -->
         <div class="col-lg-8 animate-fade">
             
             <!-- Header -->
             <div class="mb-4">
-                <h3 class="fw-bold mb-1 text-white">Halo, <span class="text-warning"><?= $user['nama'] ?? 'Peserta' ?></span> 👋</h3>
-                <p class="text-white opacity-75 mb-0 fw-medium"><?= $user['profesi'] ?? 'Umum' ?> | <?= $user['instansi'] ?? 'Instansi' ?></p>
+                <h3 class="fw-bold mb-1 text-white animate-bounce-welcome">Halo, <span class="text-warning"><?= $user['nama'] ?? 'Peserta' ?></span> <span class="animate-wave">👋</span></h3>
+                <p class="text-white opacity-75 mb-0 fw-medium animate-bounce-welcome" style="animation-delay: 0.1s;"><?= $user['profesi'] ?? 'Umum' ?> | <?= $user['instansi'] ?? 'Instansi' ?></p>
             </div>
 
             <!-- Stats Row -->
@@ -148,7 +168,7 @@
                             <h6 class="fw-bold mb-1 text-white"><?= $da['nama'] ?></h6>
                             <small class="text-white opacity-75 fw-bold"><i class="fas fa-calendar-alt me-1"></i> Selesai: <?= tanggal_indo($da['jadwal_selesai'] ?? $da['jadwal_mulai']) ?></small>
                         </div>
-                        <a href="<?= base_url('pelatihan/peserta/belajar/'.$da['id']) ?>" class="btn btn-action-global text-white rounded-pill fw-bold px-4" style="background-color: #059669;">Lanjut Belajar</a>
+                        <a href="<?= base_url('pelatihan/peserta/belajar/'.$da['id']) ?>" class="btn btn-action-global text-dark rounded-pill fw-bold px-4" style="background-color: #f8f9fa;">Lanjut Belajar</a>
                     </div>
                 </div>
                 <?php endforeach; ?>
@@ -169,12 +189,12 @@
                                 <?php if(!empty($p['gambar_pelatihan'])): ?>
                                 <div class="position-relative d-flex align-items-center justify-content-center" style="height: 100px;">
                                     <img src="<?= base_url($p['gambar_pelatihan']) ?>" alt="<?= esc($p['nama']) ?>" class="w-100 h-100" style="object-fit: cover;" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                                    <div class="w-100 h-100 p-2" style="display: none; background: linear-gradient(135deg, #0f172a 0%, #f59e0b 100%); flex-direction: column; align-items: center; justify-content: center; border-bottom: 2px solid #f59e0b;">
+                                    <div class="w-100 h-100 p-2" style="display: none; background: linear-gradient(135deg, #0f172a 0%, #c62828 100%); flex-direction: column; align-items: center; justify-content: center; border-bottom: 2px solid #c62828;">
                                         <div class="fw-bold text-white text-center" style="font-size: 0.75rem; line-height: 1.2;"><?= esc($p['nama']) ?></div>
                                     </div>
                                 </div>
                                 <?php else: ?>
-                                <div class="position-relative d-flex align-items-center justify-content-center p-2" style="height: 100px; background: linear-gradient(135deg, #0f172a 0%, #f59e0b 100%); border-bottom: 2px solid #f59e0b;">
+                                <div class="position-relative d-flex align-items-center justify-content-center p-2" style="height: 100px; background: linear-gradient(135deg, #0f172a 0%, #c62828 100%); border-bottom: 2px solid #c62828;">
                                     <div class="fw-bold text-white text-center" style="font-size: 0.75rem; line-height: 1.2;"><?= esc($p['nama']) ?></div>
                                 </div>
                                 <?php endif; ?>
@@ -183,7 +203,7 @@
                                     <h6 class="fw-bold mb-2 lh-base text-white" style="font-size: 0.9rem; min-height: 2.7rem;"><?= $p['nama'] ?></h6>
                                     <div class="d-flex justify-content-between align-items-center border-top border-light pt-2" style="border-color: rgba(255,255,255,0.1) !important;">
                                         <small class="opacity-75 fw-bold text-white" style="font-size: 0.7rem;"><i class="fas fa-users me-1"></i> <?= $p['peserta'] ?> Peserta</small>
-                                        <small class="text-warning fw-bold text-uppercase" style="font-size: 0.7rem;"><?= $p['biaya'] ?></small>
+                                        <small class="text-white fw-bold text-uppercase" style="font-size: 0.7rem;"><?= $p['biaya'] ?></small>
                                     </div>
                                 </div>
                             </div>
@@ -199,10 +219,10 @@
             <div class="card p-3 sticky-top border-0 shadow-sm" style="top: 100px; background: #ffffff; border-radius: 16px;">
                 <h6 class="fw-bold mb-3 px-2 border-start border-3 border-danger text-dark"><i class="far fa-calendar-alt me-2 text-danger"></i> Agenda Diklat</h6>
                 <div class="d-flex flex-wrap gap-2 mb-3 px-2">
-                    <span class="badge bg-success" style="font-size: 0.65rem;">Lanjutkan</span>
-                    <span class="badge bg-warning text-dark" style="font-size: 0.65rem;">Terdaftar</span>
-                    <span class="badge" style="background-color: #8b5cf6; font-size: 0.65rem;">Selesai</span>
-                    <span class="badge bg-secondary" style="font-size: 0.65rem;">Belum Daftar</span>
+                    <span class="badge bg-danger" style="font-size: 0.65rem;">Lanjutkan</span>
+                    <span class="badge bg-dark text-white" style="font-size: 0.65rem;">Terdaftar</span>
+                    <span class="badge bg-secondary" style="font-size: 0.65rem;">Selesai</span>
+                    <span class="badge bg-light text-dark border" style="font-size: 0.65rem;">Belum Daftar</span>
                 </div>
                 <div id='calendar' style="height: 400px; font-size: 0.85rem;" class="text-dark"></div>
             </div>
@@ -222,13 +242,13 @@
         var formattedEvents = scheduleData.map(function(item) {
             let color = '#334155'; // default grey for belum daftar
             if (item.status_enrollment === 'lanjutkan') {
-                color = '#10b981'; // green for Lanjutkan
+                color = '#c62828'; // red for Lanjutkan
             } else if (item.status_enrollment === 'terdaftar') {
-                color = '#f59e0b'; // yellow/gold for Terdaftar
+                color = '#111111'; // black for Terdaftar
             } else if (item.status_enrollment === 'selesai') {
-                color = '#8b5cf6'; // purple for Selesai
+                color = '#6c757d'; // gray for Selesai
             } else {
-                color = item.tipe === 'pelatihan' ? '#64748b' : '#334155';
+                color = item.tipe === 'pelatihan' ? '#6c757d' : '#f8f9fa';
             }
 
             return {
@@ -288,13 +308,13 @@
                 // Add Status Badge
                 let statusBadge = '';
                 if (p.status_enrollment === 'lanjutkan') {
-                    statusBadge = '<span class="badge bg-success w-100 p-2">STATUS: SEDANG BERJALAN (LANJUTKAN)</span>';
+                    statusBadge = '<span class="badge bg-danger w-100 p-2">STATUS: SEDANG BERJALAN (LANJUTKAN)</span>';
                 } else if (p.status_enrollment === 'terdaftar') {
-                    statusBadge = '<span class="badge bg-warning text-dark w-100 p-2">STATUS: TERDAFTAR</span>';
+                    statusBadge = '<span class="badge bg-dark text-white w-100 p-2">STATUS: TERDAFTAR</span>';
                 } else if (p.status_enrollment === 'selesai') {
-                    statusBadge = '<span class="badge" style="background-color: #8b5cf6; width: 100%; padding: 0.5rem;">STATUS: SELESAI</span>';
+                    statusBadge = '<span class="badge bg-secondary w-100 p-2">STATUS: SELESAI</span>';
                 } else {
-                    statusBadge = '<span class="badge bg-secondary w-100 p-2">STATUS: BELUM MENDAFTAR</span>';
+                    statusBadge = '<span class="badge bg-light text-dark border w-100 p-2">STATUS: BELUM MENDAFTAR</span>';
                 }
                 
                 htmlContent += `<div class="mt-4">${statusBadge}</div></div>`;

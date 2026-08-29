@@ -202,12 +202,12 @@ class Database extends Config
         }
 
         // Parse Railway Environment Variables at Runtime
-        if (getenv('MYSQLHOST') || getenv('MYSQL_HOST')) {
-            $this->default['hostname'] = getenv('MYSQLHOST') ?: getenv('MYSQL_HOST');
-            $this->default['username'] = getenv('MYSQLUSER') ?: getenv('MYSQL_USER') ?: '';
-            $this->default['password'] = getenv('MYSQLPASSWORD') ?: getenv('MYSQL_PASSWORD') ?: '';
-            $this->default['database'] = getenv('MYSQLDATABASE') ?: getenv('MYSQL_DATABASE') ?: '';
-            $this->default['port']     = (int) (getenv('MYSQLPORT') ?: getenv('MYSQL_PORT') ?: 3306);
-        }
+        // if (getenv('MYSQLHOST') || getenv('MYSQL_HOST')) {
+        //     $this->default['hostname'] = getenv('MYSQLHOST') ?: getenv('MYSQL_HOST');
+        //     $this->default['username'] = getenv('MYSQLUSER') ?: getenv('MYSQL_USER') ?: '';
+        //     $this->default['password'] = getenv('MYSQLPASSWORD') ?: getenv('MYSQL_PASSWORD') ?: '';
+        //     $this->default['database'] = getenv('MYSQLDATABASE') ?: getenv('MYSQL_DATABASE') ?: '';
+        //     $this->default['port']     = (int) (getenv('MYSQLPORT') ?: getenv('MYSQL_PORT') ?: 3306);
+        // }
     }
 }

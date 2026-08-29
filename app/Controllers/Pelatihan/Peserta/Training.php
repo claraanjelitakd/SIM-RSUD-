@@ -188,14 +188,27 @@ class Training extends BaseController
         $preTestAttempted = false;
         $postTestAttempts = 0;
         $preTestScore = 0;
+        $preTestBenar = 0;
+        $preTestSalah = 0;
+        $preTestTotal = 0;
         $postTestScore = 0;
         $postTestStatus = 'Tidak Lulus';
+        $postTestBenar = 0;
+        $postTestSalah = 0;
+        $postTestTotal = 0;
 
         if ($pesertaRecord) {
             $ptAttempt = $db->table('peserta_ujian_pelatihan')->where('peserta_pelat_id', $pesertaRecord['id'])->where('tipe_ujian', 'pre_test')->get()->getRowArray();
             if ($ptAttempt) {
                 $preTestAttempted = true;
                 $preTestScore = $ptAttempt['score'];
+                
+                $ptAnswers = $db->table('peserta_jawaban_ujian_pelatihan')->where('peserta_ujian_id', $ptAttempt['id'])->get()->getResultArray();
+                $preTestTotal = count($ptAnswers);
+                foreach ($ptAnswers as $ans) {
+                    if ($ans['is_correct'] == 1) $preTestBenar++;
+                }
+                $preTestSalah = $preTestTotal - $preTestBenar;
             }
             $postTestAttempts = $db->table('peserta_ujian_pelatihan')->where('peserta_pelat_id', $pesertaRecord['id'])->where('tipe_ujian', 'post_test')->countAllResults();
             
@@ -207,6 +220,13 @@ class Training extends BaseController
             if ($ptLastAttempt) {
                 $postTestScore = $ptLastAttempt['score'];
                 $postTestStatus = $ptLastAttempt['status_lulus'];
+                
+                $ptPostAnswers = $db->table('peserta_jawaban_ujian_pelatihan')->where('peserta_ujian_id', $ptLastAttempt['id'])->get()->getResultArray();
+                $postTestTotal = count($ptPostAnswers);
+                foreach ($ptPostAnswers as $ans) {
+                    if ($ans['is_correct'] == 1) $postTestBenar++;
+                }
+                $postTestSalah = $postTestTotal - $postTestBenar;
             }
         }
 
@@ -238,6 +258,21 @@ class Training extends BaseController
             }
         }
         
+        $statsSesiTotal = count($sesi);
+        $statsSesiHadir = 0;
+        $materiAlfa = [];
+        foreach ($sesi as $s) {
+            $status = $presensiStatusList[$s['id']] ?? null;
+            if ($status === 'Hadir') {
+                $statsSesiHadir++;
+            } elseif ($status === 'Alfa') {
+                $mats = $db->table('materi_pelatihan')->where('sesi_id', $s['id'])->get()->getResultArray();
+                foreach ($mats as $m) {
+                    $materiAlfa[] = $m['judul'] . ' (Sesi: ' . $s['nama_sesi'] . ')';
+                }
+            }
+        }
+
         foreach ($sesi as $s) {
             $sessionOpenAt = !empty($s['tanggal']) && !empty($s['waktu']) ? strtotime($s['tanggal'] . ' ' . $s['waktu']) : null;
             $sessionCloseAt = !empty($s['tanggal']) && !empty($s['jam_tutup']) ? strtotime($s['tanggal'] . ' ' . $s['jam_tutup']) : (!empty($s['tanggal']) ? strtotime($s['tanggal'] . ' 23:59:59') : $sessionOpenAt);
@@ -541,9 +576,18 @@ class Training extends BaseController
             'sertifikat' => $sertifikat,
             'pre_test_attempted' => $preTestAttempted,
             'pre_test_score' => $preTestScore,
+            'pre_test_benar' => $preTestBenar,
+            'pre_test_salah' => $preTestSalah,
+            'pre_test_total' => $preTestTotal,
             'post_test_attempts' => $postTestAttempts,
             'post_test_score' => $postTestScore,
             'post_test_status' => $postTestStatus,
+            'post_test_benar' => $postTestBenar,
+            'post_test_salah' => $postTestSalah,
+            'post_test_total' => $postTestTotal,
+            'stats_sesi_total' => $statsSesiTotal,
+            'stats_sesi_hadir' => $statsSesiHadir,
+            'materi_alfa' => $materiAlfa,
             'max_post_test_attempts' => 3,
             'materiList' => $materiList,
             'narasumberList' => $narasumberList,

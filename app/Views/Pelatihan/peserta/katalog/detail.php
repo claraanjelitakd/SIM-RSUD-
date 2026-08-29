@@ -26,7 +26,7 @@ $has_progress = $has_progress ?? false;
     }
 
     .detail-header {
-        background: linear-gradient(135deg, rgba(110, 10, 15, 0.95) 0%, rgba(70, 0, 5, 0.98) 100%);
+        background: linear-gradient(135deg, rgba(80, 10, 15, 0.98) 0%, rgba(45, 5, 10, 0.98) 100%);
         color: white;
         padding: 40px 0 80px;
         border-radius: 0 0 40px 40px;
@@ -42,18 +42,19 @@ $has_progress = $has_progress ?? false;
         right: 0;
         width: 100%;
         height: 100%;
-        background: linear-gradient(135deg, rgba(206, 33, 39, 0.2) 0%, transparent 60%);
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, transparent 60%);
         pointer-events: none;
     }
 
     .info-card {
-        background: white;
+        background: linear-gradient(135deg, rgba(80, 10, 15, 0.98) 0%, rgba(45, 5, 10, 0.98) 100%);
         border-radius: 24px;
         padding: 30px;
-        box-shadow: var(--soft-shadow);
-        border: 1px solid rgba(0,0,0,0.05);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1);
+        border: 1px solid rgba(255,255,255,0.15);
         position: sticky;
         top: 20px;
+        color: white;
     }
 
     .section-title {
@@ -145,9 +146,9 @@ $has_progress = $has_progress ?? false;
     /* Scrollbar styling for target profesi removed */
 
     .glass-wrapper {
-        background: linear-gradient(135deg, rgba(165,15,20,0.9) 0%, rgba(130,5,10,0.98) 100%);
-        box-shadow: 0 15px 35px rgba(165,15,20,0.3), inset 0 1px 0 rgba(255,255,255,0.2);
-        border: 1px solid rgba(255,255,255,0.1) !important;
+        background: linear-gradient(135deg, rgba(80, 10, 15, 0.98) 0%, rgba(45, 5, 10, 0.98) 100%);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1);
+        border: 1px solid rgba(255,255,255,0.15) !important;
         color: white;
     }
 
@@ -203,13 +204,24 @@ $has_progress = $has_progress ?? false;
         box-shadow: 0 15px 25px rgba(0,0,0,0.2) !important;
         filter: brightness(1.15);
     }
+
+    @keyframes bounceAction {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-5px); }
+    }
+    .btn-mantul {
+        animation: bounceAction 2s infinite ease-in-out;
+    }
+    .btn-mantul:hover {
+        animation-play-state: paused;
+    }
 </style>
 
 <?php
     $gambarPelatihan = !empty($p['gambar_pelatihan']) ? base_url($p['gambar_pelatihan']) : null;
 ?>
 
-<div class="detail-header" <?= $gambarPelatihan ? 'style="background-image: linear-gradient(135deg, rgba(110, 10, 15, 0.85) 0%, rgba(70, 0, 5, 0.95) 100%), url(' . esc($gambarPelatihan) . '); background-size: cover; background-position: center;"' : '' ?>>
+<div class="detail-header" <?= $gambarPelatihan ? 'style="background-image: linear-gradient(135deg, rgba(80, 10, 15, 0.95) 0%, rgba(45, 5, 10, 0.98) 100%), url(' . esc($gambarPelatihan) . '); background-size: cover; background-position: center;"' : '' ?>>
     <div class="container-fluid px-4 px-lg-5 position-relative" style="z-index: 2;">
         
         <!-- Integrated Breadcrumb -->
@@ -248,35 +260,35 @@ $has_progress = $has_progress ?? false;
     <div class="row g-4 justify-content-center">
         
         <!-- Sidebar Info -->
-        <div class="col-lg-3 col-xl-3 order-lg-2 animate__animated animate__fadeInUp" style="animation-delay: 0.2s;">
+        <div class="col-lg-3 col-xl-3 order-2 order-lg-2 animate__animated animate__fadeInUp" style="animation-delay: 0.2s;">
             <div class="info-card">
-                <h5 class="fw-bold mb-4 text-dark d-flex align-items-center gap-2">
-                    <i class="fas fa-clipboard-check text-danger"></i> Registrasi
+                <h5 class="fw-bold mb-4 text-white d-flex align-items-center gap-2">
+                    <i class="fas fa-clipboard-check text-white"></i> Registrasi
                 </h5>
                 
-                <div class="bg-danger bg-opacity-10 border border-danger border-opacity-25 rounded-4 p-3 mb-4">
+                <div class="bg-white bg-opacity-10 border border-white border-opacity-25 rounded-4 p-3 mb-4">
                     <div class="d-flex justify-content-between mb-3 align-items-center">
-                        <span class="text-danger fw-bold small">KUOTA</span>
-                        <span class="h6 fw-bold mb-0 text-danger"><?= $p['kuota'] ?? 0 ?> <small class="text-danger opacity-75">Slot</small></span>
+                        <span class="text-white fw-bold small">KUOTA</span>
+                        <span class="h6 fw-bold mb-0 text-white"><?= $p['kuota'] ?? 0 ?> <small class="text-white opacity-75">Slot</small></span>
                     </div>
                     <div class="d-flex justify-content-between mb-3 align-items-center">
-                        <span class="text-danger fw-bold small">TERISI</span>
-                        <span class="h6 fw-bold mb-0 text-danger"><?= $p['peserta'] ?? 0 ?> <small class="text-danger opacity-75">Peserta</small></span>
+                        <span class="text-white fw-bold small">TERISI</span>
+                        <span class="h6 fw-bold mb-0 text-white"><?= $p['peserta'] ?? 0 ?> <small class="text-white opacity-75">Peserta</small></span>
                     </div>
-                    <div class="d-flex justify-content-between align-items-center pt-3 border-top border-danger border-opacity-25">
-                        <span class="text-danger fw-bold small">TOTAL BOBOT</span>
-                        <span class="h5 fw-bold mb-0 text-danger"><?= $p['jpl'] ?? 0 ?> <small class="text-danger opacity-75 fs-6">JPL</small></span>
+                    <div class="d-flex justify-content-between align-items-center pt-3 border-top border-white border-opacity-25">
+                        <span class="text-white fw-bold small">TOTAL BOBOT</span>
+                        <span class="h5 fw-bold mb-0 text-white"><?= $p['jpl'] ?? 0 ?> <small class="text-white opacity-75 fs-6">JPL</small></span>
                     </div>
                 </div>
 
                 <?php if (($p['biaya'] ?? '') == 'Berbayar'): ?>
-                <div class="mb-4 border border-danger border-opacity-25 p-3 rounded-4 bg-danger bg-opacity-10">
-                    <h6 class="fw-bold mb-3 text-danger"><i class="fas fa-wallet me-2"></i> Biaya Pendaftaran</h6>
-                    <div class="fs-4 fw-bold text-dark mb-3">Rp <?= number_format($p['biaya_nominal'] ?? 0, 0, ',', '.') ?></div>
-                    <div class="small text-muted mb-1">Transfer Rekening:</div>
-                    <div class="bg-white p-2 rounded border fw-bold text-dark mb-1"><?= $p['nama_bank'] ?? '-' ?></div>
-                    <div class="bg-white p-2 rounded border font-monospace text-danger fw-bold mb-1"><?= $p['no_rekening'] ?? '-' ?></div>
-                    <div class="bg-white p-2 rounded border small text-muted">a.n <?= $p['atas_nama'] ?? '-' ?></div>
+                <div class="mb-4 border border-white border-opacity-25 p-3 rounded-4 bg-white bg-opacity-10">
+                    <h6 class="fw-bold mb-3 text-white"><i class="fas fa-wallet me-2"></i> Biaya Pendaftaran</h6>
+                    <div class="fs-4 fw-bold text-white mb-3">Rp <?= number_format($p['biaya_nominal'] ?? 0, 0, ',', '.') ?></div>
+                    <div class="small text-white opacity-75 mb-1">Transfer Rekening:</div>
+                    <div class="bg-white bg-opacity-10 p-2 rounded border border-white border-opacity-10 fw-bold text-white mb-1"><?= $p['nama_bank'] ?? '-' ?></div>
+                    <div class="bg-white bg-opacity-10 p-2 rounded border border-white border-opacity-10 font-monospace text-danger fw-bold mb-1"><?= $p['no_rekening'] ?? '-' ?></div>
+                    <div class="bg-white bg-opacity-10 p-2 rounded border border-white border-opacity-10 small text-white opacity-75">a.n <?= $p['atas_nama'] ?? '-' ?></div>
                 </div>
                 <?php endif; ?>
 
@@ -291,59 +303,59 @@ $has_progress = $has_progress ?? false;
                     <?php if ($reg_status == 'pending') : ?>
                         <?php if (($p['biaya'] ?? '') == 'Berbayar') : ?>
                             <?php if (!empty($reg['bukti_bayar'])): ?>
-                                <div class="alert alert-warning border-0 text-center py-3 mb-0 rounded-3 shadow-sm">
+                                <div class="alert alert-warning border-0 text-center py-3 mb-0 rounded-3 shadow-sm btn-mantul" style="background: rgba(245, 158, 11, 0.1); color: #fcd34d;">
                                     <i class="fas fa-hourglass-half mb-2 fs-4"></i><br>
-                                    <span class="fw-bold d-block text-dark">MENUNGGU VERIFIKASI</span>
-                                    <small class="text-dark opacity-75">Bukti bayar sedang ditinjau.</small>
+                                    <span class="fw-bold d-block">MENUNGGU VERIFIKASI</span>
+                                    <small class="opacity-75">Bukti bayar sedang ditinjau.</small>
                                 </div>
                             <?php else: ?>
-                                <button type="button" onclick="showUploadForm()" class="btn w-100 py-3 fs-6 rounded-pill text-white fw-bold shadow btn-action" style="background-color: #d97706;">
+                                <button type="button" onclick="showUploadForm()" class="btn w-100 py-3 fs-6 rounded-pill text-white fw-bold shadow btn-action btn-mantul" style="background-color: #d97706;">
                                     UNGGAH BUKTI BAYAR <i class="fas fa-upload ms-2"></i>
                                 </button>
                             <?php endif; ?>
                         <?php else: ?>
-                            <div class="alert alert-warning border-0 text-center py-3 mb-0 rounded-3 shadow-sm">
+                            <div class="alert alert-warning border-0 text-center py-3 mb-0 rounded-3 shadow-sm btn-mantul" style="background: rgba(245, 158, 11, 0.1); color: #fcd34d;">
                                 <i class="fas fa-hourglass-half mb-2 fs-4"></i><br>
-                                <span class="fw-bold d-block text-dark">MENUNGGU VERIFIKASI</span>
-                                <small class="text-dark opacity-75">Admin sedang meninjau profil Anda.</small>
+                                <span class="fw-bold d-block">MENUNGGU VERIFIKASI</span>
+                                <small class="opacity-75">Admin sedang meninjau profil Anda.</small>
                             </div>
                         <?php endif; ?>
                     <?php elseif ($reg_status == 'disetujui') : ?>
                         <?php if ($is_learning_finished): ?>
-                            <div class="alert alert-secondary border-0 text-center py-3 mb-0 rounded-3 shadow-sm fw-bold">
+                            <div class="alert alert-secondary border-0 text-center py-3 mb-0 rounded-3 shadow-sm fw-bold btn-mantul" style="background: rgba(255,255,255,0.1); color: white;">
                                 PELATIHAN BERAKHIR
                             </div>
                         <?php elseif ($is_learning_open): ?>
-                            <a href="<?= base_url('pelatihan/peserta/belajar/'.$p['id']) ?>" class="btn w-100 py-3 rounded-pill fw-bold text-white shadow-lg btn-action" style="background-color: #059669;">
+                            <a href="<?= base_url('pelatihan/peserta/belajar/'.$p['id']) ?>" class="btn w-100 py-3 rounded-pill fw-bold text-white shadow-lg btn-action btn-mantul" style="background-color: #059669;">
                                 <?= !empty($has_progress) ? 'LANJUTKAN BELAJAR' : 'MULAI BELAJAR' ?> <i class="fas fa-play-circle ms-2"></i>
                             </a>
                         <?php else: ?>
-                            <div class="alert alert-success border-0 text-center py-3 mb-0 rounded-3 shadow-sm">
+                            <div class="alert alert-success border-0 text-center py-3 mb-0 rounded-3 shadow-sm btn-mantul" style="background: rgba(16, 185, 129, 0.1); color: #34d399;">
                                 <i class="fas fa-check-circle mb-2 fs-4"></i><br>
-                                <span class="fw-bold d-block text-dark">TERDAFTAR</span>
-                                <small class="text-dark opacity-75">Tunggu jadwal dimulai.</small>
+                                <span class="fw-bold d-block">TERDAFTAR</span>
+                                <small class="opacity-75">Tunggu jadwal dimulai.</small>
                             </div>
                         <?php endif; ?>
                     <?php else : ?>
                         <?php if (!$is_reg_open): ?>
-                            <div class="registration-alert text-center mb-0">
+                            <div class="registration-alert text-center mb-0 btn-mantul" style="background: rgba(255,255,255,0.1); border-left: 5px solid rgba(255,255,255,0.2);">
                                 <?php if ($regBukaTs && $nowTs < $regBukaTs): ?>
                                     <i class="fas fa-lock mb-2 fs-4 text-white-50"></i>
                                     <strong class="d-block mb-1">PENDAFTARAN BELUM DIBUKA</strong>
-                                    <small class="d-block">Buka: <?= esc($regBukaText) ?></small>
+                                    <small class="d-block text-white opacity-75">Buka: <?= esc($regBukaText) ?></small>
                                 <?php else: ?>
                                     <i class="fas fa-lock mb-2 fs-4 text-white-50"></i>
                                     <strong class="d-block mb-1">PENDAFTARAN DITUTUP</strong>
-                                    <small class="d-block">Tutup: <?= esc($regTutupText) ?></small>
+                                    <small class="d-block text-white opacity-75">Tutup: <?= esc($regTutupText) ?></small>
                                 <?php endif; ?>
                             </div>
                         <?php else: ?>
                             <form action="<?= base_url('pelatihan/peserta/daftar/'.$p['id']) ?>" method="POST">
-                                <button type="submit" class="btn w-100 py-3 rounded-pill text-white fw-bold shadow-lg btn-action" style="background-color: #2563eb;">
+                                <button type="submit" class="btn w-100 py-3 rounded-pill text-white fw-bold shadow-lg btn-action btn-mantul" style="background-color: var(--primary-red);">
                                     DAFTAR SEKARANG <i class="fas fa-arrow-right ms-2"></i>
                                 </button>
                             </form>
-                            <div class="text-center mt-3 small text-muted">
+                            <div class="text-center mt-3 small text-white opacity-75">
                                 Ditutup pada: <?= esc($regTutupText) ?>
                             </div>
                         <?php endif; ?>
@@ -354,7 +366,7 @@ $has_progress = $has_progress ?? false;
         </div>
 
         <!-- Main Content (Beside Sidebar) -->
-        <div class="col-lg-8 col-xl-9 order-lg-1 animate__animated animate__fadeInUp" style="animation-delay: 0.1s;">
+        <div class="col-lg-8 col-xl-9 order-1 order-lg-1 animate__animated animate__fadeInUp" style="animation-delay: 0.1s;">
             
             <div class="glass-wrapper p-4 p-md-5 rounded-4 mb-4">
                 
@@ -596,8 +608,6 @@ $has_progress = $has_progress ?? false;
         </div>
     </div>
 </div>
-
-
 
 <?= $this->endSection() ?>
 

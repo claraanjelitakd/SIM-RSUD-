@@ -23,14 +23,11 @@
     'routing' => 'Config\\routing',
     'Config\\routing' => 'Config\\routing',
     'Config\\Feature' => 'Config\\Feature',
-    'Routing' => 'Config\\Routing',
-    'App' => 'Config\\App',
     'Config\\Session' => 'Config\\Session',
-    'Config\\View' => 'Config\\View',
+    'Routing' => 'Config\\Routing',
     'Config\\Database' => 'Config\\Database',
-    'Config\\Validation' => 'Config\\Validation',
-    'Config\\Security' => 'Config\\Security',
-    'Config\\Format' => 'Config\\Format',
+    'App' => 'Config\\App',
+    'Config\\View' => 'Config\\View',
   ),
   'instances' => 
   array (
@@ -41,7 +38,7 @@
       array (
         0 => 404,
       ),
-       'errorViewPath' => 'D:\\magang\\SIM-RSUD-\\app\\Views/errors',
+       'errorViewPath' => 'C:\\ALL FILES\\Kerja Praktik\\SIM-RSUD-\\app\\Views/errors',
        'sensitiveDataInTrace' => 
       array (
       ),
@@ -113,7 +110,7 @@
        'reservedCharacters' => '{}()/\\@:',
        'file' => 
       array (
-        'storePath' => 'D:\\magang\\SIM-RSUD-\\writable\\cache/',
+        'storePath' => 'C:\\ALL FILES\\Kerja Praktik\\SIM-RSUD-\\writable\\cache/',
         'mode' => 416,
       ),
        'memcached' => 
@@ -364,7 +361,7 @@
       ),
        'collectVarData' => true,
        'maxHistory' => 20,
-       'viewsPath' => 'D:\\magang\\SIM-RSUD-\\vendor\\codeigniter4\\framework\\system\\Debug/Toolbar/Views/',
+       'viewsPath' => 'C:\\ALL FILES\\Kerja Praktik\\SIM-RSUD-\\vendor\\codeigniter4\\framework\\system\\Debug/Toolbar/Views/',
        'maxQueries' => 100,
        'watchedDirectories' => 
       array (
@@ -391,7 +388,7 @@
     \Config\Routing::__set_state(array(
        'routeFiles' => 
       array (
-        0 => 'D:\\magang\\SIM-RSUD-\\app\\Config/Routes.php',
+        0 => 'C:\\ALL FILES\\Kerja Praktik\\SIM-RSUD-\\app\\Config/Routes.php',
       ),
        'defaultNamespace' => 'App\\Controllers',
        'defaultController' => 'Home',
@@ -519,7 +516,7 @@
     )),
     'Config\\Logger' => 
     \Config\Logger::__set_state(array(
-       'threshold' => 4,
+       'threshold' => 9,
        'dateFormat' => 'Y-m-d H:i:s',
        'handlers' => 
       array (
@@ -546,7 +543,7 @@
     \Config\Routing::__set_state(array(
        'routeFiles' => 
       array (
-        0 => 'D:\\magang\\SIM-RSUD-\\app\\Config/Routes.php',
+        0 => 'C:\\ALL FILES\\Kerja Praktik\\SIM-RSUD-\\app\\Config/Routes.php',
       ),
        'defaultNamespace' => 'App\\Controllers',
        'defaultController' => 'Home',
@@ -574,13 +571,79 @@
        'driver' => 'CodeIgniter\\Session\\Handlers\\FileHandler',
        'cookieName' => 'ci_session',
        'expiration' => 7200,
-       'savePath' => 'D:\\magang\\SIM-RSUD-\\writable\\session',
+       'savePath' => 'C:\\ALL FILES\\Kerja Praktik\\SIM-RSUD-\\writable\\session',
        'matchIP' => false,
        'timeToUpdate' => 300,
        'regenerateDestroy' => false,
        'DBGroup' => NULL,
        'lockRetryInterval' => 100000,
        'lockMaxRetries' => 300,
+    )),
+    'Config\\Database' => 
+    \Config\Database::__set_state(array(
+       'filesPath' => 'C:\\ALL FILES\\Kerja Praktik\\SIM-RSUD-\\app\\Database\\',
+       'defaultGroup' => 'default',
+       'default' => 
+      array (
+        'DSN' => '',
+        'hostname' => 'localhost',
+        'username' => 'root',
+        'password' => '',
+        'database' => 'sim_diklat',
+        'DBDriver' => 'MySQLi',
+        'DBPrefix' => '',
+        'pConnect' => false,
+        'DBDebug' => true,
+        'charset' => 'utf8mb4',
+        'DBCollat' => 'utf8mb4_general_ci',
+        'swapPre' => '',
+        'encrypt' => false,
+        'compress' => false,
+        'strictOn' => false,
+        'failover' => 
+        array (
+        ),
+        'port' => 3306,
+        'numberNative' => false,
+        'foundRows' => false,
+        'dateFormat' => 
+        array (
+          'date' => 'Y-m-d',
+          'datetime' => 'Y-m-d H:i:s',
+          'time' => 'H:i:s',
+        ),
+      ),
+       'tests' => 
+      array (
+        'DSN' => '',
+        'hostname' => '127.0.0.1',
+        'username' => '',
+        'password' => '',
+        'database' => ':memory:',
+        'DBDriver' => 'SQLite3',
+        'DBPrefix' => 'db_',
+        'pConnect' => false,
+        'DBDebug' => true,
+        'charset' => 'utf8',
+        'DBCollat' => '',
+        'swapPre' => '',
+        'encrypt' => false,
+        'compress' => false,
+        'strictOn' => true,
+        'failover' => 
+        array (
+        ),
+        'port' => 3306,
+        'foreignKeys' => true,
+        'busyTimeout' => 1000,
+        'synchronous' => NULL,
+        'dateFormat' => 
+        array (
+          'date' => 'Y-m-d',
+          'datetime' => 'Y-m-d H:i:s',
+          'time' => 'H:i:s',
+        ),
+      ),
     )),
     'Config\\View' => 
     \Config\View::__set_state(array(
@@ -663,120 +726,6 @@
       array (
       ),
        'appOverridesFolder' => 'overrides',
-    )),
-    'Config\\Database' => 
-    \Config\Database::__set_state(array(
-       'filesPath' => 'D:\\magang\\SIM-RSUD-\\app\\Database\\',
-       'defaultGroup' => 'default',
-       'default' => 
-      array (
-        'DSN' => '',
-        'hostname' => 'localhost',
-        'username' => 'root',
-        'password' => '',
-        'database' => 'sim_diklat',
-        'DBDriver' => 'MySQLi',
-        'DBPrefix' => '',
-        'pConnect' => false,
-        'DBDebug' => true,
-        'charset' => 'utf8mb4',
-        'DBCollat' => 'utf8mb4_general_ci',
-        'swapPre' => '',
-        'encrypt' => false,
-        'compress' => false,
-        'strictOn' => false,
-        'failover' => 
-        array (
-        ),
-        'port' => 3306,
-        'numberNative' => false,
-        'foundRows' => false,
-        'dateFormat' => 
-        array (
-          'date' => 'Y-m-d',
-          'datetime' => 'Y-m-d H:i:s',
-          'time' => 'H:i:s',
-        ),
-      ),
-       'tests' => 
-      array (
-        'DSN' => '',
-        'hostname' => '127.0.0.1',
-        'username' => '',
-        'password' => '',
-        'database' => ':memory:',
-        'DBDriver' => 'SQLite3',
-        'DBPrefix' => 'db_',
-        'pConnect' => false,
-        'DBDebug' => true,
-        'charset' => 'utf8',
-        'DBCollat' => '',
-        'swapPre' => '',
-        'encrypt' => false,
-        'compress' => false,
-        'strictOn' => true,
-        'failover' => 
-        array (
-        ),
-        'port' => 3306,
-        'foreignKeys' => true,
-        'busyTimeout' => 1000,
-        'synchronous' => NULL,
-        'dateFormat' => 
-        array (
-          'date' => 'Y-m-d',
-          'datetime' => 'Y-m-d H:i:s',
-          'time' => 'H:i:s',
-        ),
-      ),
-    )),
-    'Config\\Validation' => 
-    \Config\Validation::__set_state(array(
-       'ruleSets' => 
-      array (
-        0 => 'CodeIgniter\\Validation\\StrictRules\\Rules',
-        1 => 'CodeIgniter\\Validation\\StrictRules\\FormatRules',
-        2 => 'CodeIgniter\\Validation\\StrictRules\\FileRules',
-        3 => 'CodeIgniter\\Validation\\StrictRules\\CreditCardRules',
-      ),
-       'templates' => 
-      array (
-        'list' => 'CodeIgniter\\Validation\\Views\\list',
-        'single' => 'CodeIgniter\\Validation\\Views\\single',
-      ),
-    )),
-    'Config\\Security' => 
-    \Config\Security::__set_state(array(
-       'csrfProtection' => 'cookie',
-       'tokenRandomize' => false,
-       'tokenName' => 'csrf_test_name',
-       'headerName' => 'X-CSRF-TOKEN',
-       'cookieName' => 'csrf_cookie_name',
-       'expires' => 7200,
-       'regenerate' => true,
-       'redirect' => false,
-    )),
-    'Config\\Format' => 
-    \Config\Format::__set_state(array(
-       'supportedResponseFormats' => 
-      array (
-        0 => 'application/json',
-        1 => 'application/xml',
-        2 => 'text/xml',
-      ),
-       'formatters' => 
-      array (
-        'application/json' => 'CodeIgniter\\Format\\JSONFormatter',
-        'application/xml' => 'CodeIgniter\\Format\\XMLFormatter',
-        'text/xml' => 'CodeIgniter\\Format\\XMLFormatter',
-      ),
-       'formatterOptions' => 
-      array (
-        'application/json' => 320,
-        'application/xml' => 0,
-        'text/xml' => 0,
-      ),
-       'jsonEncodeDepth' => 512,
     )),
   ),
 );

@@ -165,8 +165,12 @@
     <!-- Header Section -->
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3 animate__animated animate__fadeIn">
         <div>
-            <h3 class="fw-bold mb-1 text-white"><i class="fas fa-certificate me-2 text-warning"></i> Sertifikat & Portofolio</h3>
-            <p class="text-white opacity-75 mb-0 fw-medium">Kelola dokumen sertifikat, capaian JPL, dan surat tugas Anda.</p>
+            <h3 class="fw-bold mb-3 text-white">Sertifikat & Portofolio</h3>
+            <div class="highlight-bounce mt-2 d-inline-block">
+                <span class="badge bg-warning text-dark px-3 py-2 fw-bold shadow-sm" style="font-size: 0.9rem;">
+                    Kelola dokumen sertifikat, capaian JPL, dan surat tugas Anda.
+                </span>
+            </div>
         </div>
         <div class="d-flex gap-3 align-items-center flex-wrap">
             <div class="text-md-end border-end pe-3 border-2 border-light" style="border-color: rgba(255,255,255,0.2) !important;">
@@ -246,7 +250,7 @@
     </div>
 
     <!-- Tab Content -->
-    <div class="glass-card-global p-4" id="certContainer">
+    <div class="p-4" id="certContainer">
         <?php if (empty($sertifikat)) : ?>
             <div class="text-center py-5">
                 <i class="fas fa-folder-open text-white fa-3x mb-3 opacity-25"></i>
@@ -261,7 +265,7 @@
                 <div class="cert-card-horizontal cert-item" data-type="<?= $typeClass ?>" data-year="<?= date('Y', strtotime($s['created_at'])) ?>" data-month="<?= date('m', strtotime($s['created_at'])) ?>" data-title="<?= strtolower(esc($s['judul'])) ?>" data-penerbit="<?= strtolower(esc($s['penerbit'] ?? '')) ?>">
                     <!-- Icon -->
                     <div class="cert-doc-icon">
-                        <i class="fas fa-file-contract fa-3x text-danger"></i>
+                        <i class="fas fa-file-contract fa-3x text-white opacity-75"></i>
                     </div>
 
                     <!-- Info -->

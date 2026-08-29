@@ -234,33 +234,40 @@
         }
 
         @media (max-width: 992px) {
+            body {
+                height: auto;
+                min-height: 100vh;
+                display: block;
+                overflow-x: hidden;
+                overflow-y: auto;
+            }
+
             .login-container {
-                flex-direction: column;
-                width: 100vw;
-                height: 100vh;
+                display: block;
+                width: 100%;
+                height: auto;
+                min-height: 100vh;
+                overflow: visible;
             }
 
             .login-side-info {
                 width: 100%;
-                padding: 1.5rem;
-                flex: 0 0 auto;
+                padding: 2rem 1.5rem;
                 height: auto;
             }
 
             .login-form-side {
-                padding: 2rem;
-                flex: 1 1 auto;
+                padding: 3rem 1.5rem 2rem 1.5rem;
                 height: auto;
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
+                display: block;
             }
 
             .back-home-floating {
-                top: 1rem;
-                right: 1.5rem;
-                padding: 6px 12px;
-                font-size: 0.75rem;
+                position: relative;
+                top: 0;
+                right: 0;
+                display: inline-flex;
+                margin-bottom: 2rem;
             }
         }
 

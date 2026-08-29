@@ -182,23 +182,32 @@
         }
 
         @media (max-width: 992px) {
+            body {
+                height: auto;
+                min-height: 100vh;
+                display: block;
+                overflow-x: hidden;
+                overflow-y: auto;
+            }
+
             .register-container {
-                flex-direction: column;
-                width: 100vw;
-                height: 100vh;
+                display: block;
+                width: 100%;
+                height: auto;
+                min-height: 100vh;
+                overflow: visible;
             }
 
             .register-side-info {
                 width: 100%;
                 padding: 1.5rem;
-                flex: 0 0 auto;
                 height: auto;
             }
 
             .register-form-side {
                 padding: 1.5rem;
-                flex: 1 1 auto;
                 height: auto;
+                display: block;
             }
         }
 

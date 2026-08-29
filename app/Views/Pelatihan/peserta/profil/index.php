@@ -195,7 +195,7 @@
                     <div class="section-title text-white"><i class="fas fa-users-cog me-1 text-warning"></i> Jenis Peserta</div>
                     <div class="row g-4 mb-5">
                         <div class="col-md-12">
-                            <label class="form-label small fw-bold text-white mb-1">PILIH JENIS PESERTA</label>
+                            <label class="form-label small fw-bold text-white mb-1">PILIH JENIS PESERTA <span class="text-white fs-6">*</span></label>
                             <select name="jenis_peserta" class="form-select form-control-custom" required>
                                 <option value="" disabled>Pilih Jenis Peserta...</option>
                                 <option value="named" <?= ($user['jenis_peserta'] ?? '') == 'named' ? 'selected' : '' ?>>NAMED (PEGAWAI)</option>
@@ -208,7 +208,7 @@
                     <div class="section-title text-white"><i class="fas fa-user me-1 text-warning"></i> Data Personal</div>
                     <div class="row g-4 mb-5">
                         <div class="col-md-6">
-                            <label class="form-label small fw-bold text-white mb-1">NAMA LENGKAP</label>
+                            <label class="form-label small fw-bold text-white mb-1">NAMA LENGKAP <span class="text-white fs-6">*</span></label>
                             <input type="text" name="nama_lengkap" class="form-control form-control-custom" value="<?= $user['nama_lengkap'] ?? '' ?>" required pattern="[A-Za-z\s\.,']+" title="Nama hanya boleh mengandung huruf, spasi, titik, koma, atau tanda kutip tunggal.">
                         </div>
                         <div class="col-md-6">
@@ -217,12 +217,12 @@
                         </div>
                         
                         <div class="col-md-6">
-                            <label class="form-label small fw-bold text-white mb-1">EMAIL AKTIF</label>
+                            <label class="form-label small fw-bold text-white mb-1">EMAIL AKTIF <span class="text-white fs-6">*</span></label>
                             <input type="email" name="email" class="form-control form-control-custom" value="<?= $user['email'] ?? '' ?>" required>
 
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label small fw-bold text-white mb-1">NO. WHATSAPP</label>
+                            <label class="form-label small fw-bold text-white mb-1">NO. WHATSAPP <span class="text-white fs-6">*</span></label>
                             <input type="tel" name="no_wa" class="form-control form-control-custom" value="<?= $user['no_wa'] ?? '' ?>" required pattern="[0-9]{10,15}" maxlength="15" inputmode="numeric" title="Nomor WhatsApp harus berupa angka murni (10 s.d 15 digit).">
                         </div>
                     </div>
@@ -254,12 +254,12 @@
                     <div class="section-title text-white"><i class="fas fa-shield-alt me-1 text-warning"></i> Keamanan Akun</div>
                     <div class="row g-4 mb-5">
                         <div class="col-md-12">
-                            <div class="mb-2 text-white opacity-75 small fw-bold fst-italic">Kosongkan sandi jika tidak ingin diubah.</div>
+                            <div class="mb-2 text-white small fw-bold fst-italic">Kosongkan sandi jika tidak ingin diubah.</div>
                             <label class="form-label small fw-bold text-white mb-1">KATA SANDI BARU</label>
                             <div class="input-group">
                                 <input type="password" name="password" class="form-control form-control-custom" minlength="8" placeholder="Minimal 8 karakter..." pattern="^(?=.*[0-9])(?=.*[a-zA-Z])[a-zA-Z0-9]+$" title="Password harus mengandung kombinasi huruf dan angka (tanpa spasi/simbol).">
                             </div>
-                            <div class="form-text" style="font-size: 0.75rem;">Min. 8 karakter, kombinasi angka & huruf.</div>
+                            <div class="form-text text-white fw-bold mt-2" style="font-size: 0.75rem;">Min. 8 karakter, kombinasi angka & huruf.</div>
                         </div>
                     </div>
 

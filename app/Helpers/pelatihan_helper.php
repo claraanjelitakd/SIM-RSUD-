@@ -97,7 +97,7 @@ if (!function_exists("renderPelatihanFilePreview")) {
             return "<div class=\"document-preview-shell\"><div class=\"document-preview-head\"><span>" . esc($title) . "</span></div><div class=\"p-4 text-center bg-light\" style=\"min-height: 220px;\"><i class=\"fas fa-file-alt fa-3x text-muted mb-3\"></i><h6 class=\"fw-bold text-dark\">Preview teks tidak tersedia</h6><p class=\"text-muted small mb-0\">File materi ini tidak dapat dibuka langsung dari ruang belajar.</p></div></div>";
         }
 
-        return "<div class=\"py-4 text-center\"><i class=\"fas fa-file-alt fa-4x text-muted mb-3\"></i><h6 class=\"text-white\">File ini tidak punya preview bawaan browser.</h6><div class=\"text-warning fw-bold\">" . esc($title) . "</div></div>";
+        return "<div class=\"py-4 text-center\"><i class=\"fas fa-file-alt fa-4x text-muted mb-3\"></i><h6 class=\"text-dark fw-bold\">File ini tidak punya preview bawaan browser.</h6><div class=\"text-secondary fw-bold\">" . esc($title) . "</div></div>";
     }
 }
 

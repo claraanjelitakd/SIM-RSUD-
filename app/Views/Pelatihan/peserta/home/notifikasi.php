@@ -76,7 +76,7 @@
                 <button class="btn btn-action-global rounded-pill px-4 fw-bold small text-white" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);" onclick="markAllRead()"><i class="fas fa-check-double me-2"></i> Tandai Semua Terbaca</button>
             </div>
 
-            <div class="glass-card-global">
+            <div class="p-4" style="background: rgba(255,255,255,0.08); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.15); border-radius: 16px;">
                 <?php if (empty($notifikasi)) : ?>
                     <div class="p-5 text-center">
                         <div class="d-inline-flex p-4 rounded-circle mb-3" style="background: rgba(255,255,255,0.1);">
@@ -103,7 +103,7 @@
                                 $colorClass = 'bg-warning-light';
                             }
                         ?>
-                        <div class="notif-item <?= ($n['is_read'] == 0) ? 'unread' : '' ?>" style="<?= ($n['is_read'] == 0) ? 'cursor: pointer;' : '' ?>" <?= ($n['is_read'] == 0) ? 'onclick="markRead(' . $n['id'] . ', this)"' : '' ?>>
+                        <div class="notif-item <?= ($n['is_read'] == 0) ? 'unread' : '' ?>" data-id="<?= $n['id'] ?>" style="cursor: pointer;">
                             <div class="d-flex gap-3">
                                 <div class="notif-icon <?= $colorClass ?>">
                                     <i class="fas <?= $icon ?> fa-lg"></i>
@@ -113,7 +113,8 @@
                                         <h6 class="fw-bold mb-0 pe-4 text-white"><?= esc($n['title']) ?></h6>
                                         <small class="text-white opacity-50 text-nowrap"><?= isset($n['created_at']) ? date('d M Y, H:i', strtotime($n['created_at'])) . ' WIB' : 'Baru saja' ?></small>
                                     </div>
-                                    <p class="text-white opacity-75 small mb-0"><?= $n['message'] ?></p>
+                                    <p class="text-white opacity-75 small mb-0 text-truncate" style="max-width: 90%;"><?= $n['message'] ?></p>
+                                    <div class="d-none full-message"><?= $n['message'] ?></div>
                                 </div>
                             </div>
                         </div>
@@ -121,20 +122,83 @@
                 <?php endif; ?>
             </div>
 
-            <div class="text-center mt-5">
-                <button onclick="window.location.reload();" class="btn btn-action-global rounded-pill px-5 fw-bold small text-white border border-white" style="background: rgba(255,255,255,0.1);">Muat Lebih Banyak</button>
+            <div class="text-center mt-5" id="loadMoreContainer">
+                <button id="loadMoreBtn" class="btn btn-action-global rounded-pill px-5 fw-bold small text-white border border-white" style="background: rgba(255,255,255,0.1);">Muat Lebih Banyak</button>
             </div>
         </div>
     </div>
 </div>
 
+<?= $this->endSection() ?>
+
+<?= $this->section('scripts') ?>
 <script>
+let isAllLoaded = false;
+
+$(document).ready(function() {
+    const $items = $('.notif-item');
+    
+    // Default show only 3
+    if ($items.length > 3) {
+        $items.slice(3).hide();
+    } else {
+        $('#loadMoreContainer').hide();
+    }
+
+    // Load More click
+    $('#loadMoreBtn').on('click', function() {
+        $items.show();
+        $(this).hide();
+        isAllLoaded = true;
+    });
+
+    // Search functionality
+    $('#notificationSearch').on('input', function() {
+        const query = $(this).val().toLowerCase();
+        
+        if (query.trim() === '') {
+            // Restore default view
+            if (!isAllLoaded) {
+                $items.hide().slice(0, 3).show();
+                $('#loadMoreContainer').show();
+            } else {
+                $items.show();
+            }
+        } else {
+            // Filter mode
+            $('#loadMoreContainer').hide();
+            $items.each(function() {
+                const text = $(this).text().toLowerCase();
+                $(this).toggle(text.includes(query));
+            });
+        }
+    });
+
+    // Click Notification to view details
+    $(document).on('click', '.notif-item', function(e) {
+        let id = $(this).data('id');
+        let title = $(this).find('h6').text();
+        let message = $(this).find('.full-message').html(); // use html to keep formatting
+        let isUnread = $(this).hasClass('unread');
+
+        Swal.fire({
+            title: title,
+            html: `<div class="text-start" style="font-size: 0.95rem; line-height: 1.6;">${message}</div>`,
+            icon: 'info',
+            confirmButtonColor: '#ce2127',
+            confirmButtonText: 'Tutup'
+        });
+
+        if (isUnread) {
+            markRead(id, this);
+        }
+    });
+});
+
 function markRead(id, element) {
     $.post('<?= base_url("pelatihan/peserta/notifikasi/read/") ?>' + id, function(response) {
         if(response.success) {
             $(element).removeClass('unread');
-            $(element).removeAttr('onclick');
-            $(element).css('cursor', 'default');
             
             // Update badge count in header if exists
             var badge = $('.badge.bg-danger.rounded-pill');
@@ -154,20 +218,11 @@ function markRead(id, element) {
 function markAllRead() {
     $.post('<?= base_url("pelatihan/peserta/notifikasi/read_all") ?>', function(response) {
         if(response.success) {
-            $('.notif-item.unread').removeClass('unread').removeAttr('onclick').css('cursor', 'default');
+            $('.notif-item.unread').removeClass('unread');
             $('.badge.bg-danger.rounded-pill').remove();
             $('.top-0.start-100').remove();
         }
     });
 }
-
-$('#notificationSearch').on('input', function() {
-    const query = $(this).val().toLowerCase();
-    $('.notif-item').each(function() {
-        const text = $(this).text().toLowerCase();
-        $(this).toggle(text.includes(query));
-    });
-});
 </script>
-
 <?= $this->endSection() ?>

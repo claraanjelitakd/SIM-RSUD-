@@ -24,23 +24,26 @@
         border-radius: 12px;
         font-weight: 800;
         color: #fff !important;
-        background: #475569 !important; /* Muted Slate */
+        background: rgba(16, 185, 129, 0.15) !important; /* Green glass */
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
         padding: 12px 25px;
         transition: all 0.3s;
-        border: 1px solid #334155;
+        border: 1px solid rgba(16, 185, 129, 0.3);
         margin-right: 10px;
-        opacity: 0.7;
+        opacity: 0.8;
     }
     .nav-pills .nav-link:hover {
-        background: #1e293b !important;
+        background: rgba(16, 185, 129, 0.3) !important;
         opacity: 1;
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2);
     }
     .nav-pills .nav-link.active {
-        background-color: var(--primary-dark) !important;
+        background: rgba(16, 185, 129, 0.8) !important;
         color: #fff !important;
         opacity: 1;
-        box-shadow: 0 8px 20px rgba(15, 23, 42, 0.3);
-        border-color: var(--primary-dark);
+        box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+        border-color: rgba(16, 185, 129, 1);
     }
     .card {
         border: 2px solid #f1f5f9;
@@ -58,15 +61,15 @@
         border-radius: 100px;
     }
     .btn-action-custom {
-        background: linear-gradient(135deg, var(--primary-red) 0%, var(--primary-gold) 100%);
+        background: linear-gradient(135deg, var(--primary-red) 0%, #7f0000 100%);
         color: white;
-        border: none;
+        border: 1px solid rgba(255,255,255,0.2);
     }
     .btn-action-custom:hover {
-        background: linear-gradient(135deg, var(--primary-gold) 0%, var(--primary-red) 100%);
+        background: linear-gradient(135deg, #e53935 0%, var(--primary-red) 100%);
         color: white;
         transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+        box-shadow: 0 4px 15px rgba(206, 33, 39, 0.4);
     }
     .status-card {
         background: rgba(15, 23, 42, 0.4); /* subtle navy background */
@@ -78,8 +81,12 @@
 <div class="pt-1 mb-5 glass-wrapper-global">
     <!-- Header Section -->
     <div class="mb-4 animate__animated animate__fadeIn">
-        <h3 class="fw-bold mb-1 text-white"><i class="fas fa-book-open me-2 text-warning"></i> Pembelajaran Saya</h3>
-        <p class="text-white opacity-75 mb-0 fw-medium">Berikut daftar program pembelajaran yang Anda ambil beserta status pelaksanaannya.</p>
+        <h3 class="fw-bold mb-3 text-white">Pembelajaran Saya</h3>
+        <div class="highlight-bounce mt-2 d-inline-block">
+            <span class="badge bg-warning text-dark px-3 py-2 fw-bold shadow-sm" style="font-size: 0.9rem;">
+                Berikut daftar program pembelajaran yang Anda ambil beserta status pelaksanaannya.
+            </span>
+        </div>
     </div>
     <ul class="nav nav-pills mb-5 p-2 rounded-lg d-inline-flex border border-light" style="background: rgba(0,0,0,0.2); border-color: rgba(255,255,255,0.1) !important;" id="ps-tab" role="tablist">
         <li class="nav-item" role="presentation"><button class="nav-link active" data-bs-toggle="pill" data-bs-target="#minta-akses" type="button" role="tab">MINTA AKSES</button></li>
@@ -94,7 +101,7 @@
             <div class="row g-4">
                 <?php foreach ($minta_akses as $p): ?>
                 <div class="col-md-4">
-                    <div class="glass-card-global h-100 status-card" style="border-top: 4px solid var(--primary-gold);">
+                    <div class="glass-card-global h-100 status-card" style="border-top: 3px solid rgba(255,255,255,0.7);">
                         <div class="p-4 d-flex flex-column h-100">
                             <h5 class="fw-bold text-white text-uppercase"><?= $p['nama'] ?></h5>
                             <p class="small opacity-75 text-white fw-bold mb-3"><i class="fas fa-hospital me-1 text-warning"></i> <?= strtoupper($p['penyelenggara']) ?></p>
@@ -114,7 +121,7 @@
             <div class="row g-4">
                 <?php foreach ($belum_dimulai as $p): ?>
                 <div class="col-md-4">
-                    <div class="glass-card-global h-100 status-card" style="border-top: 4px solid #10b981;">
+                    <div class="glass-card-global h-100 status-card" style="border-top: 3px solid rgba(255,255,255,0.7);">
                         <div class="p-4 d-flex flex-column h-100">
                             <h5 class="fw-bold text-white text-uppercase"><?= $p['nama'] ?></h5>
                             <p class="small opacity-75 text-white fw-bold mb-3"><i class="fas fa-hospital me-1 text-warning"></i> <?= strtoupper($p['penyelenggara']) ?></p>
@@ -145,7 +152,7 @@
             <div class="row g-4">
                 <?php foreach ($berjalan as $p): ?>
                 <div class="col-md-4">
-                    <div class="glass-card-global h-100 status-card" style="border-top: 4px solid #3b82f6;">
+                    <div class="glass-card-global h-100 status-card" style="border-top: 3px solid rgba(255,255,255,0.7);">
                         <div class="p-4 d-flex flex-column h-100">
                             <h5 class="fw-bold text-white text-uppercase"><?= $p['nama'] ?></h5>
                             <p class="small opacity-75 text-white fw-bold mb-3"><i class="fas fa-hospital me-1 text-warning"></i> <?= strtoupper($p['penyelenggara']) ?></p>
@@ -175,7 +182,7 @@
             <div class="row g-4">
                 <?php foreach ($selesai as $p): ?>
                 <div class="col-md-4">
-                    <div class="glass-card-global h-100 status-card" style="border-top: 4px solid #8b5cf6;">
+                    <div class="glass-card-global h-100 status-card" style="border-top: 3px solid rgba(255,255,255,0.7);">
                         <div class="p-4 text-center">
                             <div class="p-3 rounded-circle d-inline-block mb-3" style="width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.15);">
                                 <i class="fas fa-medal text-warning fs-4"></i>
@@ -195,7 +202,7 @@
             <div class="row g-4">
                 <?php foreach ($dibatalkan as $p): ?>
                 <div class="col-md-4">
-                    <div class="glass-card-global h-100 status-card" style="border-top: 4px solid #ef4444; border-style: dashed;">
+                    <div class="glass-card-global h-100 status-card" style="border-top: 3px dashed rgba(255,255,255,0.7);">
                         <div class="p-4 text-center opacity-75">
                             <i class="fas fa-times-circle text-danger fs-1 mb-3 opacity-75"></i>
                             <h5 class="fw-bold text-white text-uppercase"><?= $p['nama'] ?></h5>
