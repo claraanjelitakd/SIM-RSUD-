@@ -184,6 +184,39 @@ class AdminDiklat extends BaseController
             }
         }
 
+        // Merge pengajuan documents
+        $pengajuanList = $this->pengajuanModel->where('institusi_id', $id)->findAll();
+        $pengajuanDocFields = [
+            'file_proposal' => 'Proposal',
+            'file_surat_pengantar' => 'Surat Pengantar',
+            'file_logbook' => 'Logbook',
+            'file_panduan' => 'Panduan',
+            'file_daftar_mhs' => 'Daftar Mahasiswa',
+            'file_kompetensi' => 'Kompetensi',
+            'file_sk_pembimbing' => 'SK Pembimbing',
+            'file_bukti_bayar' => 'Bukti Bayar'
+        ];
+        foreach ($pengajuanList as $pengajuan) {
+            foreach ($pengajuanDocFields as $field => $label) {
+                if (!empty($pengajuan[$field])) {
+                    $dokumenList[] = [
+                        'id' => null,
+                        'institusi_id' => $id,
+                        'judul' => $label . ' (' . $pengajuan['nama_program'] . ')',
+                        'nama_file' => $pengajuan[$field],
+                        'original_name' => null,
+                        'tipe_file' => 'application/pdf',
+                        'ukuran_file' => null,
+                        'status' => 'verified',
+                        'keterangan' => null,
+                        'created_at' => $pengajuan['created_at'] ?? date('Y-m-d H:i:s'),
+                        'updated_at' => $pengajuan['updated_at'] ?? date('Y-m-d H:i:s'),
+                        'is_pengajuan' => true,
+                    ];
+                }
+            }
+        }
+
         $counts = [
             'inbox' => $this->institusiModel->where('status_verifikasi', 'pending')->countAllResults(),
             'approved' => $this->institusiModel->where('status_verifikasi', 'approved')->countAllResults(),

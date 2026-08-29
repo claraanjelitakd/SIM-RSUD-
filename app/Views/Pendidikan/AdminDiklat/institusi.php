@@ -138,12 +138,19 @@
                             </div>
                             <div class="d-flex gap-2">
                                 <?php if ($d['nama_file']): ?>
-                                <?php $fileUrl = $d['id'] ? base_url('pendidikan/admin/diklat/api/dokumen/view/' . $d['id']) : base_url('pendidikan/admin/diklat/api/institusi/file/' . $detail['id'] . '/' . ($d['judul'] === 'MOU / Perjanjian Kerja Sama' ? 'mou' : 'permohonan')); ?>
-                                <?php $dlUrl = $d['id'] ? base_url('pendidikan/admin/diklat/api/dokumen/download/' . $d['id']) : $fileUrl . '?download=1'; ?>
+                                <?php 
+                                if (isset($d['is_pengajuan']) && $d['is_pengajuan']) {
+                                    $fileUrl = base_url('uploads/dokumen_pengajuan/' . $d['nama_file']);
+                                    $dlUrl = $fileUrl;
+                                } else {
+                                    $fileUrl = $d['id'] ? base_url('pendidikan/admin/diklat/api/dokumen/view/' . $d['id']) : base_url('pendidikan/admin/diklat/api/institusi/file/' . $detail['id'] . '/' . ($d['judul'] === 'MOU / Perjanjian Kerja Sama' ? 'mou' : 'permohonan'));
+                                    $dlUrl = $d['id'] ? base_url('pendidikan/admin/diklat/api/dokumen/download/' . $d['id']) : $fileUrl . '?download=1'; 
+                                }
+                                ?>
                                 <a href="<?= $fileUrl ?>" target="_blank" class="btn btn-sm btn-outline-primary flex-grow-1">
                                     <i class="fas fa-eye me-1"></i> Lihat
                                 </a>
-                                <a href="<?= $dlUrl ?>" class="btn btn-sm btn-outline-secondary">
+                                <a href="<?= $dlUrl ?>" class="btn btn-sm btn-outline-secondary" <?php if (isset($d['is_pengajuan']) && $d['is_pengajuan']) echo 'download'; ?>>
                                     <i class="fas fa-download"></i>
                                 </a>
                                 <?php else: ?>

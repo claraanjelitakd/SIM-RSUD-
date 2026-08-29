@@ -86,6 +86,58 @@
     </div>
 
     <div class="col-lg-8">
+        <div class="card p-4 mb-4">
+            <h6 class="fw-bold mb-3"><i class="fas fa-file-alt text-primary me-2"></i>Dokumen Pengajuan</h6>
+            <div class="row g-3">
+                <?php 
+                $docFields = [
+                    'file_proposal' => 'Proposal',
+                    'file_surat_pengantar' => 'Surat Pengantar',
+                    'file_logbook' => 'Logbook',
+                    'file_panduan' => 'Panduan',
+                    'file_daftar_mhs' => 'Daftar Mahasiswa',
+                    'file_kompetensi' => 'Kompetensi',
+                    'file_sk_pembimbing' => 'SK Pembimbing',
+                    'file_bukti_bayar' => 'Bukti Bayar'
+                ];
+                $hasDocs = false;
+                foreach ($docFields as $field => $label) {
+                    if (!empty($detail['pengajuan'][$field])) {
+                        $hasDocs = true;
+                        break;
+                    }
+                }
+                ?>
+                <?php if ($hasDocs): ?>
+                    <?php foreach ($docFields as $field => $label): 
+                        $filename = $detail['pengajuan'][$field] ?? null;
+                        if ($filename):
+                    ?>
+                    <div class="col-md-6">
+                        <div class="border rounded p-3">
+                            <div class="d-flex align-items-center gap-3 mb-2">
+                                <i class="fas fa-file-pdf fa-2x text-danger"></i>
+                                <div>
+                                    <small class="fw-semibold d-block"><?= $label ?></small>
+                                </div>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <a href="<?= base_url('uploads/dokumen_pengajuan/' . $filename) ?>" target="_blank" class="btn btn-sm btn-outline-primary flex-grow-1">
+                                    <i class="fas fa-eye me-1"></i> Lihat
+                                </a>
+                                <a href="<?= base_url('uploads/dokumen_pengajuan/' . $filename) ?>" download class="btn btn-sm btn-outline-secondary">
+                                    <i class="fas fa-download"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <?php endif; endforeach; ?>
+                <?php else: ?>
+                    <div class="col-12 text-center text-muted py-3">Belum ada dokumen</div>
+                <?php endif; ?>
+            </div>
+        </div>
+
         <div class="card p-4">
             <h6 class="fw-bold mb-3"><i class="fas fa-users text-primary me-2"></i>Daftar Mahasiswa</h6>
             <div class="table-responsive">
