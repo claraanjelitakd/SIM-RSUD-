@@ -14,9 +14,6 @@
                     </ol>
                 </nav>
             </div>
-            <button onclick="window.print()" class="btn btn-outline-dark">
-                <i class="fas fa-print me-1"></i> Cetak Detail
-            </button>
         </div>
     </div>
 </div>
@@ -35,8 +32,8 @@
                         <h6 class="fw-bold"><?= $pengajuan['institusi'] ?></h6>
                     </div>
                     <div class="col-sm-6">
-                        <p class="text-muted small mb-1">Fakultas / Prodi</p>
-                        <h6 class="fw-bold"><?= $pengajuan['fakultas'] ?> / <?= $pengajuan['prodi'] ?></h6>
+                        <p class="text-muted small mb-1">Prodi</p>
+                        <h6 class="fw-bold"><?= $pengajuan['prodi'] ?></h6>
                     </div>
                 </div>
                 <div class="row mb-4">
@@ -58,12 +55,10 @@
                     <div class="col-sm-6">
                         <p class="text-muted small mb-1">Penanggung Jawab</p>
                         <h6 class="fw-bold"><?= $pengajuan['penanggung_jawab'] ?></h6>
-                        <p class="small text-muted mb-0"><?= $pengajuan['jabatan'] ?></p>
                     </div>
                     <div class="col-sm-6 text-sm-end">
                         <p class="text-muted small mb-1">Kontak PJ</p>
                         <p class="mb-0 fw-bold"><?= $pengajuan['hp_pj'] ?></p>
-                        <p class="small text-muted mb-0"><?= $pengajuan['email_pj'] ?></p>
                     </div>
                 </div>
             </div>
