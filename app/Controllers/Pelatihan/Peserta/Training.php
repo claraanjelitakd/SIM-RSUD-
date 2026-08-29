@@ -46,6 +46,7 @@ class Training extends BaseController
                 'status_peserta' => $statusPeserta,
                 'status_pembayaran' => $statusPembayaran,
                 'status_akses' => $statusAkses,
+                'bukti_bayar' => null,
                 'waktu_daftar' => date('Y-m-d H:i:s'),
                 'updated_at' => date('Y-m-d H:i:s')
             ]);
@@ -82,6 +83,19 @@ class Training extends BaseController
             }
         }
 
+        // Notify admin about new registration (or updated registration)
+        $user = $db->table('users_pelatihan')->where('nik', $userId)->get()->getRowArray();
+        $namaUser = $user ? $user['nama_lengkap'] : $userId;
+        
+        $db->table('notifikasi_pelatihan')->insert([
+            'user_id' => 'admin',
+            'title' => 'Pendaftaran Baru',
+            'message' => $namaUser . ' telah mendaftar di ' . $item['nama'] . ' (Akses: '.$statusAkses.', Bayar: '.$statusPembayaran.').',
+            'type' => 'primary',
+            'is_read' => 0,
+            'created_at' => date('Y-m-d H:i:s')
+        ]);
+
         if ($statusPembayaran == 'Pending' || $statusAkses == 'Pending') {
             $msg = 'Pendaftaran dikirim. Mohon menunggu verifikasi admin untuk pembayaran/akses.';
         } else {
@@ -90,7 +104,8 @@ class Training extends BaseController
 
         $redirect = redirect()->to('/pelatihan/peserta/detail_pelatihan/'.$id)->with('success', $msg);
 
-        if ($statusPembayaran == 'Pending' && empty($exists['bukti_bayar'])) {
+        // Show upload popup if payment is pending. We just reset or created the record, so proof is always empty here.
+        if ($statusPembayaran == 'Pending') {
             $redirect = $redirect->with('show_upload_popup', true);
         }
 
@@ -129,6 +144,17 @@ class Training extends BaseController
                     'bukti_bayar' => 'bukti_bayar/' . $newName,
                     'updated_at' => date('Y-m-d H:i:s')
                 ]);
+            
+            // Notify admin about payment upload
+            $db->table('notifikasi_pelatihan')->insert([
+                'user_id' => 'admin',
+                'title' => 'Bukti Bayar Diunggah',
+                'message' => ($user['nama_lengkap'] ?? $userId) . ' telah mengunggah bukti bayar untuk ' . ($pelatihan['nama'] ?? 'Pelatihan') . '.',
+                'type' => 'info',
+                'is_read' => 0,
+                'created_at' => date('Y-m-d H:i:s')
+            ]);
+            
             return redirect()->to('/pelatihan/peserta/detail_pelatihan/'.$id)->with('success', 'Bukti pembayaran berhasil diunggah.');
         }
 

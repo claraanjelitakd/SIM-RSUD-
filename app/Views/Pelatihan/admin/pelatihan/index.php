@@ -6,6 +6,50 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
+<?php
+function getComputedStatus($p) {
+    if (empty($p['status'])) return ['label' => 'DRAFT', 'class' => 'bg-secondary text-white', 'icon' => 'fa-file-edit'];
+    if ($p['status'] == 'Draft') return ['label' => 'DRAFT', 'class' => 'bg-secondary text-white', 'icon' => 'fa-file-edit'];
+    if ($p['status'] == 'Batal') return ['label' => 'BATAL', 'class' => 'bg-danger text-white', 'icon' => 'fa-times-circle'];
+    if ($p['status'] == 'Selesai') return ['label' => 'SELESAI', 'class' => 'bg-dark text-white', 'icon' => 'fa-check-double'];
+    
+    // Jika status Aktif, tentukan dari tanggal
+    $now = strtotime(date('Y-m-d H:i:s'));
+    
+    $regOpenStr = !empty($p['reg_buka_tgl']) && !empty($p['reg_buka_jam']) ? $p['reg_buka_tgl'] . ' ' . $p['reg_buka_jam'] : null;
+    $regCloseStr = !empty($p['reg_tutup_tgl']) && !empty($p['reg_tutup_jam']) ? $p['reg_tutup_tgl'] . ' ' . $p['reg_tutup_jam'] : null;
+    $startStr = !empty($p['jadwal_mulai']) && !empty($p['jam_mulai']) ? $p['jadwal_mulai'] . ' ' . $p['jam_mulai'] : null;
+    $endStr = !empty($p['jadwal_selesai']) && !empty($p['jam_selesai']) ? $p['jadwal_selesai'] . ' ' . $p['jam_selesai'] : null;
+    
+    $regOpen = $regOpenStr ? strtotime($regOpenStr) : null;
+    $regClose = $regCloseStr ? strtotime($regCloseStr) : null;
+    $start = $startStr ? strtotime($startStr) : null;
+    $end = $endStr ? strtotime($endStr) : null;
+
+    if ($end && $now > $end) {
+        return ['label' => 'SELESAI PELATIHAN', 'class' => 'bg-dark text-white border border-dark', 'icon' => 'fa-flag-checkered'];
+    }
+    
+    if ($start && $now >= $start && (!$end || $now <= $end)) {
+        return ['label' => 'SEDANG BERLANGSUNG', 'class' => 'bg-primary text-white border border-primary', 'icon' => 'fa-spinner fa-spin'];
+    }
+    
+    if ($regClose && $start && $now > $regClose && $now < $start) {
+        return ['label' => 'PENDAFTARAN TUTUP', 'class' => 'bg-warning text-dark border border-warning', 'icon' => 'fa-lock'];
+    }
+    
+    if ($regOpen && $regClose && $now >= $regOpen && $now <= $regClose) {
+        return ['label' => 'PENDAFTARAN BUKA', 'class' => 'bg-success text-white border border-success', 'icon' => 'fa-door-open'];
+    }
+    
+    if ($regOpen && $now < $regOpen) {
+        return ['label' => 'BELUM BUKA', 'class' => 'bg-info text-white border border-info', 'icon' => 'fa-clock'];
+    }
+    
+    return ['label' => 'AKTIF', 'class' => 'bg-success text-white border border-success', 'icon' => 'fa-check-circle'];
+}
+?>
+
 <div class="row mb-4">
     <div class="col-md-12">
         <div class="card border-0 shadow-sm rounded-custom bg-white overflow-hidden border-top border-danger border-4">
@@ -64,29 +108,62 @@
                                         <?php $persenKuota = (!empty($p['kuota']) && ($p['peserta'] ?? 0) > 0) ? (($p['peserta'] / $p['kuota']) * 100) : 0; ?>
                                         <div class="progress-bar bg-danger" style="width: <?= $persenKuota ?>%"></div>
                                     </div>
-                                    <?php if($status_p == 'Draft'): ?>
-                                        <span class="badge bg-secondary text-white rounded-pill px-2 py-1 fw-bold" style="font-size: 0.6rem; letter-spacing: 0.3px;"><i class="fas fa-file-edit me-1"></i> DRAFT</span>
-                                    <?php elseif($status_p == 'Aktif'): ?>
-                                        <span class="badge bg-dark text-white border border-danger border-opacity-50 rounded-pill px-2 py-1 fw-bold" style="font-size: 0.6rem; letter-spacing: 0.3px;"><i class="fas fa-check-circle me-1 text-danger"></i> AKTIF</span>
-                                    <?php else: ?>
-                                        <span class="badge bg-secondary text-white rounded-pill px-2 py-1 fw-bold" style="font-size: 0.6rem; letter-spacing: 0.3px;"><i class="fas fa-check-double me-1"></i> SELESAI</span>
-                                    <?php endif; ?>
+                                    <?php $cStatus = getComputedStatus($p); ?>
+                                    <span class="badge <?= $cStatus['class'] ?> rounded-pill px-2 py-1 fw-bold shadow-sm" style="font-size: 0.6rem; letter-spacing: 0.3px;"><i class="fas <?= $cStatus['icon'] ?> me-1"></i> <?= $cStatus['label'] ?></span>
                                 </td>
                                 <td class="pe-4 text-center">
                                     <div class="d-flex justify-content-center align-items-center gap-1 flex-nowrap">
                                         <?php if($status_p == 'Selesai' || $status_p == 'Batal'): ?>
-                                            <button class="btn btn-white btn-action-custom text-muted border border-opacity-50" title="Selesai" disabled><i class="fas fa-cog small-icon"></i></button>
+                                            <button class="btn btn-white btn-action-custom text-muted border border-opacity-50" title="Kelola Pelatihan" disabled><i class="fas fa-cog small-icon"></i></button>
                                         <?php else: ?>
                                             <a href="<?= base_url('pelatihan/admin/pelatihan/kelola/'.($p['id'] ?? 0)) ?>" class="btn btn-white btn-action-custom text-dark border shadow-sm" title="Kelola Pelatihan"><i class="fas fa-cog small-icon"></i></a>
                                         <?php endif; ?>
                                         
-                                        <?php if($status_p == 'Draft'): ?>
-                                            <button type="button" class="btn btn-dark btn-status-toggle fw-bold" onclick="changeStatus(<?= $p['id'] ?? 0 ?>, 'Aktif')" title="Publikasikan Diklat">AKTIF</button>
-                                        <?php elseif($status_p == 'Aktif'): ?>
-                                            <button type="button" class="btn btn-outline-secondary btn-status-toggle fw-bold" onclick="changeStatus(<?= $p['id'] ?? 0 ?>, 'Selesai')" title="Tutup / Selesaikan Diklat">SELESAI</button>
-                                        <?php else: ?>
-                                            <button type="button" class="btn btn-dark btn-status-toggle fw-bold" onclick="changeStatus(<?= $p['id'] ?? 0 ?>, 'Draft')" title="Kembalikan ke Draft">DRAFT</button>
-                                        <?php endif; ?>
+                                        <div class="dropdown">
+                                            <button class="btn btn-white btn-action-custom text-dark border shadow-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Ubah Status Pelatihan" style="width: auto !important; padding: 0 10px !important; border-radius: 5px !important; height: 28px !important; font-size: 0.68rem !important; font-weight: bold;">
+                                                STATUS
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-end shadow-sm" style="font-size: 0.85rem; width: 290px;">
+                                                <li><h6 class="dropdown-header fw-bold text-dark">STATUS PUBLIKASI PELATIHAN</h6></li>
+                                                
+                                                <?php if($status_p != 'Draft'): ?>
+                                                <li>
+                                                    <a class="dropdown-item py-2 transition-row" href="javascript:void(0)" onclick="changeStatus(<?= $p['id'] ?? 0 ?>, 'Draft')">
+                                                        <div class="fw-bold"><i class="fas fa-file-edit text-secondary me-2"></i> Draft</div>
+                                                        <div class="text-muted" style="font-size: 0.7rem; margin-left: 24px; white-space: normal;">Disembunyikan dari publik (hanya terlihat oleh Admin).</div>
+                                                    </a>
+                                                </li>
+                                                <?php endif; ?>
+                                                
+                                                <?php if($status_p != 'Aktif'): ?>
+                                                <li>
+                                                    <a class="dropdown-item py-2 transition-row" href="javascript:void(0)" onclick="changeStatus(<?= $p['id'] ?? 0 ?>, 'Aktif')">
+                                                        <div class="fw-bold"><i class="fas fa-globe text-primary me-2"></i> Aktif (Dipublikasikan)</div>
+                                                        <div class="text-muted" style="font-size: 0.7rem; margin-left: 24px; white-space: normal;">Ditampilkan ke peserta. Status berubah otomatis mengikuti tanggal.</div>
+                                                    </a>
+                                                </li>
+                                                <?php endif; ?>
+                                                
+                                                <?php if($status_p != 'Selesai'): ?>
+                                                <li>
+                                                    <a class="dropdown-item py-2 transition-row" href="javascript:void(0)" onclick="changeStatus(<?= $p['id'] ?? 0 ?>, 'Selesai')">
+                                                        <div class="fw-bold"><i class="fas fa-check-double text-dark me-2"></i> Tandai Selesai</div>
+                                                        <div class="text-muted" style="font-size: 0.7rem; margin-left: 24px; white-space: normal;">Menutup pelatihan secara manual sebelum waktunya berakhir.</div>
+                                                    </a>
+                                                </li>
+                                                <?php endif; ?>
+                                                
+                                                <?php if($status_p != 'Batal'): ?>
+                                                <li><hr class="dropdown-divider my-1"></li>
+                                                <li>
+                                                    <a class="dropdown-item py-2 transition-row" href="javascript:void(0)" onclick="changeStatus(<?= $p['id'] ?? 0 ?>, 'Batal')">
+                                                        <div class="fw-bold text-danger"><i class="fas fa-ban text-danger me-2"></i> Batalkan Pelatihan</div>
+                                                        <div class="text-muted" style="font-size: 0.7rem; margin-left: 24px; white-space: normal;">Menghentikan program dan menariknya dari peredaran.</div>
+                                                    </a>
+                                                </li>
+                                                <?php endif; ?>
+                                            </ul>
+                                        </div>
                                         
                                         <button type="button" class="btn btn-white btn-action-custom text-dark border shadow-sm btn-edit-trigger" data-pelatihan="<?= htmlspecialchars(json_encode($p), ENT_QUOTES, "UTF-8") ?>" title="Edit Data"><i class="fas fa-edit small-icon"></i></button>
                                         <button type="button" class="btn btn-danger btn-action-custom text-white border-0 shadow-sm" onclick="confirmDelete(<?= $p['id'] ?? 0 ?>)" title="Hapus"><i class="fas fa-trash small-icon"></i></button>
@@ -129,16 +206,12 @@
                 dropdownParent: $('#modalPelatihan')
             });
             $('#f_narasumber').select2({
-                placeholder: "Ketik nama narasumber lalu Enter",
-                tags: true,
-                tokenSeparators: [','],
+                placeholder: "Klik untuk mencari & memilih...",
                 width: '100%',
                 dropdownParent: $('#modalPelatihan')
             });
             $('#f_penyelenggara').select2({
-                placeholder: "Ketik nama penyelenggara lalu Enter",
-                tags: true,
-                tokenSeparators: [','],
+                placeholder: "Klik untuk mencari & memilih...",
                 width: '100%',
                 dropdownParent: $('#modalPelatihan')
             });
@@ -432,28 +505,42 @@
         window.changeStatus = function(id, targetStatus) {
             let textPrompt = '';
             let urlTarget = '';
+            let confirmText = '';
             
             if (targetStatus === 'Aktif') {
-                textPrompt = 'Mempublikasikan program ini ke publik?';
+                textPrompt = 'Dengan status Aktif, sistem akan otomatis menentukan status pendaftaran (Buka/Tutup) dan progres acara (Sedang Berlangsung/Selesai) berdasarkan tanggal yang Anda atur. Apakah Anda yakin ingin mempublikasikan program ini?';
                 urlTarget = "<?= base_url('pelatihan/admin/pelatihan/publish') ?>";
+                confirmText = 'Ya, Publikasikan!';
             } else if (targetStatus === 'Selesai') {
-                textPrompt = 'Menandai program pelatihan ini sebagai selesai?';
+                textPrompt = 'Mengubah status menjadi "Selesai" akan mengunci program pelatihan ini secara manual (override). Apakah Anda yakin?';
                 urlTarget = "<?= base_url('pelatihan/admin/pelatihan/selesai') ?>";
+                confirmText = 'Ya, Tandai Selesai!';
             } else if (targetStatus === 'Draft') {
-                textPrompt = 'Mengembalikan program ini ke status Draft?';
+                textPrompt = 'Mengembalikan program ini ke status Draft akan menyembunyikannya dari halaman publik. Apakah Anda yakin?';
                 urlTarget = "<?= base_url('pelatihan/admin/pelatihan/draft') ?>";
+                confirmText = 'Ya, Set ke Draft!';
+            } else if (targetStatus === 'Batal') {
+                textPrompt = 'Apakah Anda yakin ingin membatalkan program ini secara permanen? Peserta mungkin sudah mendaftar.';
+                urlTarget = "<?= base_url('pelatihan/admin/pelatihan/batal') ?>";
+                confirmText = 'Ya, Batalkan!';
             }
             
             Swal.fire({
-                title: 'Ubah Publikasi?',
+                title: 'Konfirmasi Ubah Status',
                 text: textPrompt,
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonColor: '#ce2127',
-                confirmButtonText: 'Ya, Ubah!',
+                confirmButtonColor: targetStatus === 'Batal' ? '#dc3545' : '#ce2127',
+                confirmButtonText: confirmText,
                 cancelButtonText: 'Batal'
             }).then((result) => {
                 if (result.isConfirmed) {
+                    Swal.fire({
+                        title: 'Memproses...',
+                        text: 'Mohon tunggu sebentar.',
+                        allowOutsideClick: false,
+                        didOpen: () => { Swal.showLoading(); }
+                    });
                     window.location.href = urlTarget + "/" + id;
                 }
             });
@@ -576,6 +663,30 @@
         background-color: #fff;
         border-color: #ce2127;
         box-shadow: 0 0 0 4px rgba(206, 33, 39, 0.08);
+    }
+    
+    /* Make Select2 Multiple look like a dropdown */
+    .select2-container--default .select2-selection--multiple {
+        position: relative;
+        padding-right: 30px !important;
+        border-radius: 10px;
+        border: 2px solid #f1f5f9;
+        min-height: 44px;
+    }
+    .select2-container--default.select2-container--focus .select2-selection--multiple {
+        border-color: #ce2127;
+        box-shadow: 0 0 0 4px rgba(206, 33, 39, 0.08);
+    }
+    .select2-container--default .select2-selection--multiple::after {
+        content: '\f0d7';
+        font-family: 'Font Awesome 5 Free', 'FontAwesome';
+        font-weight: 900;
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+        pointer-events: none;
     }
 </style>
 

@@ -147,26 +147,32 @@
                                 <option value="Blended / Hybrid">Blended / Hybrid</option>
                             </select>
                         </div>
-                        <div class="col-md-3">
-                            <label class="form-label small fw-bold text-dark">NARASUMBER</label>
-                            <div class="input-group">
-                                <select name="narasumber[]" id="f_narasumber" class="form-select border shadow-sm" multiple="multiple" required>
-                                    <?php if(!empty($master_narasumber_list)): foreach($master_narasumber_list as $mn): ?>
-                                        <option value="<?= $mn['id'] ?>"><?= htmlspecialchars(($mn['gelar_depan'] ? $mn['gelar_depan'].' ' : '').$mn['nama_pejabat'].($mn['gelar_belakang'] ? ', '.$mn['gelar_belakang'] : '')) ?></option>
-                                    <?php endforeach; endif; ?>
-                                </select>
-                                <button type="button" class="btn btn-outline-success" onclick="showModalTambahNarasumber()" title="Tambah Narasumber Baru"><i class="fas fa-plus"></i></button>
+                        <div class="col-md-4">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label class="form-label small fw-bold text-dark mb-0">PILIH NARASUMBER</label>
+                                <a href="javascript:void(0)" onclick="showModalTambahNarasumber()" class="text-primary text-decoration-none small" style="font-size: 0.7rem;"><i class="fas fa-plus-circle me-1"></i>Buat Data Baru</a>
+                            </div>
+                            <select name="narasumber[]" id="f_narasumber" class="form-select border shadow-sm" multiple="multiple" required>
+                                <?php if(!empty($master_narasumber_list)): foreach($master_narasumber_list as $mn): ?>
+                                    <option value="<?= $mn['id'] ?>"><?= htmlspecialchars(($mn['gelar_depan'] ? $mn['gelar_depan'].' ' : '').$mn['nama_pejabat'].($mn['gelar_belakang'] ? ', '.$mn['gelar_belakang'] : '')) ?></option>
+                                <?php endforeach; endif; ?>
+                            </select>
+                            <div class="mt-1 px-1 bg-light border rounded text-muted" style="font-size: 0.65rem; padding-top: 4px; padding-bottom: 4px;">
+                                <i class="fas fa-hand-pointer text-primary ms-1 me-1"></i> Klik area kotak di atas untuk mencari dan menambah nama ke daftar.
                             </div>
                         </div>
-                        <div class="col-md-3">
-                            <label class="form-label small fw-bold text-dark">PENYELENGGARA</label>
-                            <div class="input-group">
-                                <select name="penyelenggara[]" id="f_penyelenggara" class="form-select border shadow-sm" multiple="multiple" required>
-                                    <?php if(!empty($master_penyelenggara_list)): foreach($master_penyelenggara_list as $mp): ?>
-                                        <option value="<?= $mp['id'] ?>"><?= htmlspecialchars($mp['nama']) ?></option>
-                                    <?php endforeach; endif; ?>
-                                </select>
-                                <button type="button" class="btn btn-outline-success" onclick="showModalTambahPenyelenggara()" title="Tambah Penyelenggara Baru"><i class="fas fa-plus"></i></button>
+                        <div class="col-md-4">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label class="form-label small fw-bold text-dark mb-0">PILIH PENYELENGGARA</label>
+                                <a href="javascript:void(0)" onclick="showModalTambahPenyelenggara()" class="text-primary text-decoration-none small" style="font-size: 0.7rem;"><i class="fas fa-plus-circle me-1"></i>Buat Data Baru</a>
+                            </div>
+                            <select name="penyelenggara[]" id="f_penyelenggara" class="form-select border shadow-sm" multiple="multiple" required>
+                                <?php if(!empty($master_penyelenggara_list)): foreach($master_penyelenggara_list as $mp): ?>
+                                    <option value="<?= $mp['id'] ?>"><?= htmlspecialchars($mp['nama']) ?></option>
+                                <?php endforeach; endif; ?>
+                            </select>
+                            <div class="mt-1 px-1 bg-light border rounded text-muted" style="font-size: 0.65rem; padding-top: 4px; padding-bottom: 4px;">
+                                <i class="fas fa-hand-pointer text-primary ms-1 me-1"></i> Klik area kotak di atas untuk mencari dan menambah nama ke daftar.
                             </div>
                         </div>
                         <div class="col-md-9">

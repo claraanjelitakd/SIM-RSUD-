@@ -41,7 +41,13 @@ $history = $history ?? [];
                     </thead>
                     <tbody>
                         <?php foreach ($list as $row): ?>
-                            <tr>
+                            <?php 
+                                $isNew = false;
+                                if (!empty($row['waktu_daftar'])) {
+                                    $isNew = (date('Y-m-d', strtotime($row['waktu_daftar'])) == date('Y-m-d'));
+                                }
+                            ?>
+                            <tr class="<?= $isNew ? 'bg-primary bg-opacity-10' : '' ?>">
                                 <td class="ps-3 fw-bold text-dark">
                                     <a href="javascript:void(0)" class="fw-bold text-dark text-decoration-none hover-danger btn-detail-pendaftar"
                                        data-nama="<?= esc($row['nama']) ?>"
@@ -51,6 +57,9 @@ $history = $history ?? [];
                                        data-profesi="<?= esc($row['profesi_peserta'] ?? '-') ?>"
                                        data-unit="<?= esc($row['unit_peserta'] ?? '-') ?>">
                                         <?= esc($row['nama']) ?> <i class="fas fa-user-circle text-muted ms-1" style="font-size:0.85rem;"></i>
+                                        <?php if($isNew): ?>
+                                            <span class="badge bg-danger ms-1" style="font-size:0.6rem;">Baru</span>
+                                        <?php endif; ?>
                                     </a>
                                     <br>
                                     <small class="text-muted font-monospace"><?= esc($row['user_id']) ?></small>

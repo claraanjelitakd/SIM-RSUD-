@@ -18,7 +18,7 @@ class VerifikasiPendaftaran extends BaseController
                 ->where('peserta_pelatihan.status_pembayaran', 'Pending')
                 ->orWhere('peserta_pelatihan.status_akses', 'Pending')
             ->groupEnd()
-            ->orderBy('peserta_pelatihan.waktu_daftar', 'ASC')
+            ->orderBy('peserta_pelatihan.waktu_daftar', 'DESC')
             ->get()->getResultArray();
 
         $historyList = $db->table('peserta_pelatihan')

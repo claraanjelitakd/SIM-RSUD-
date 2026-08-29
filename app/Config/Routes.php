@@ -286,6 +286,7 @@ $routes->group('pelatihan/admin', ['namespace' => 'App\Controllers\Pelatihan\Adm
     $routes->get('pelatihan/publish/(:num)', 'Pelatihan::publish/$1');
     $routes->get('pelatihan/selesai/(:num)', 'Pelatihan::selesai/$1');
     $routes->get('pelatihan/draft/(:num)', 'Pelatihan::draft/$1');
+    $routes->get('pelatihan/batal/(:num)', 'Pelatihan::batal/$1');
     $routes->get('pelatihan/kelola/(:num)', 'Pelatihan::kelola/$1');
     $routes->post('pelatihan/simpan_materi', 'Pelatihan::simpan_materi');
     $routes->post('pelatihan/materi/simpan', 'Pelatihan::simpan_materi');

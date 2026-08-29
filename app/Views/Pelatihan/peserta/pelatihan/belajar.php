@@ -474,12 +474,14 @@ $nowTs = time();
     <div class="learning-content p-0">
         
         <!-- Floating Navigasi Materi Button -->
-        <button class="btn rounded-pill text-dark d-inline-flex align-items-center fw-extrabold shadow-lg" 
-                style="position: fixed; bottom: 30px; right: 30px; z-index: 1030; background: white; border: 2px solid #ce2127; animation: bounceSmall 2s infinite ease-in-out; padding: 12px 24px; font-size: 1rem; gap: 10px;" 
-                onmouseover="this.style.animationPlayState='paused';" onmouseout="this.style.animationPlayState='running';"
-                type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarBelajar" aria-controls="sidebarBelajar" title="Tampilkan Menu Progress Belajar">
-            <i class="fas fa-bars text-danger"></i> Navigasi Materi
-        </button>
+        <div style="position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); z-index: 1030; display: flex; justify-content: center;">
+            <button class="btn rounded-pill text-white d-inline-flex align-items-center fw-extrabold" 
+                    style="background: #ce2127; border: 3px solid #fff; animation: bounceSmall 2s infinite ease-in-out; padding: 14px 32px; font-size: 1.15rem; gap: 12px; box-shadow: 0 10px 25px rgba(206, 33, 39, 0.4);" 
+                    onmouseover="this.style.animationPlayState='paused';" onmouseout="this.style.animationPlayState='running';"
+                    type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarBelajar" aria-controls="sidebarBelajar" title="Tampilkan Menu Progress Belajar">
+                <i class="fas fa-list-ul"></i> Buka Navigasi Materi
+            </button>
+        </div>
 
         <div class="content-card">
             <div class="d-flex flex-column justify-content-center align-items-center mb-4 border-bottom border-white border-opacity-20 pb-4 text-center">

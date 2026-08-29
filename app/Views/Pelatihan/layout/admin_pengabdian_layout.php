@@ -319,7 +319,7 @@
                     <img src="<?= get_system_logo() ?>" alt="Logo" style="height: 40px; width: auto; object-fit: contain;">
                 </div>
                 <div>
-                    <h5 class="fw-bold mb-0 text-dark" style="letter-spacing: -0.5px; font-size: 1.1rem; line-height: 1;">SIM DIKLAT <span style="color: var(--primary-red);">RSUD KOTA YOGYAKARTA</span></h5>
+                    <h5 class="fw-bold mb-0 text-white" style="letter-spacing: -0.5px; font-size: 1.1rem; line-height: 1;">SIM DIKLAT <span class="text-white">RSUD KOTA YOGYAKARTA</span></h5>
                 </div>
             </div>
         </div>
@@ -424,8 +424,8 @@
                 <a href="<?= base_url('pelatihan/admin_pengabdian/profil') ?>" class="text-decoration-none d-flex align-items-center overflow-hidden" style="width: 100%;">
                     <img src="https://ui-avatars.com/api/?name=<?= urlencode(session()->get('nama') ?? 'Admin Pengabdian') ?>&background=c62828&color=fff" class="rounded-circle me-2 shadow-sm flex-shrink-0" width="36">
                     <div class="overflow-hidden" style="min-width: 0; max-width: calc(100% - 44px);">
-                        <div class="fw-bold small text-dark text-truncate" style="max-width: 100%;"><?= session()->get('nama') ?? 'Admin Pengabdian' ?></div>
-                        <div class="text-danger fw-bold" style="font-size: 0.6rem; letter-spacing: 0.5px;">ADMIN PENGABDIAN</div>
+                        <div class="fw-bold small text-white text-truncate" style="max-width: 100%;"><?= session()->get('nama') ?? 'Admin Pengabdian' ?></div>
+                        <div class="text-white opacity-75 fw-bold" style="font-size: 0.6rem; letter-spacing: 0.5px;">ADMIN PENGABDIAN</div>
                     </div>
                 </a>
             </div>

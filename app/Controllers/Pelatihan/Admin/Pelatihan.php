@@ -99,8 +99,6 @@ class Pelatihan extends BaseController
     {
         $db = \Config\Database::connect();
         
-        $db->query("UPDATE master_pelatihan SET status = 'Selesai' WHERE status != 'Selesai' AND jadwal_selesai IS NOT NULL AND jam_selesai IS NOT NULL AND LENGTH(jadwal_selesai) > 5 AND LENGTH(jam_selesai) > 3 AND CONCAT(jadwal_selesai, ' ', jam_selesai) <= NOW()");
-
         $pelatihan = $this->masterPelatihanModel
             ->select('master_pelatihan.*, master_kategori_skp_pelatihan.nama_kategori as kategori_kegiatan, master_kategori_skp_pelatihan.ranah as ranah_skp')
             ->join('master_kategori_skp_pelatihan', 'master_kategori_skp_pelatihan.id = master_pelatihan.kategori_skp_id', 'left')
@@ -306,6 +304,12 @@ class Pelatihan extends BaseController
     {
         $this->masterPelatihanModel->update($id, ['status' => 'Draft', 'updated_at' => date('Y-m-d H:i:s')]);
         return redirect()->back()->with('success', 'Pelatihan dikembalikan ke Draft.');
+    }
+
+    public function batal(string $id)
+    {
+        $this->masterPelatihanModel->update($id, ['status' => 'Batal', 'updated_at' => date('Y-m-d H:i:s')]);
+        return redirect()->back()->with('success', 'Pelatihan telah dibatalkan.');
     }
 
     public function update()

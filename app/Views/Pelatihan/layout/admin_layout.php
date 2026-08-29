@@ -457,7 +457,7 @@
                         <img src="<?= get_system_logo() ?>" alt="Logo" style="height: 40px; width: auto; object-fit: contain;">
                     </div>
                     <div>
-                        <h6 class="fw-bold mb-0 text-dark" style="letter-spacing: -0.5px; font-size: 1.1rem; line-height: 1;">SIM DIKLAT <span style="color: var(--primary-red);">RSUD KOTA YOGYAKARTA</span></h6>
+                        <h6 class="fw-bold mb-0 text-white" style="letter-spacing: -0.5px; font-size: 1.1rem; line-height: 1;">SIM DIKLAT <span class="text-white">RSUD KOTA YOGYAKARTA</span></h6>
                     </div>
                 </div>
             </a>
@@ -527,8 +527,8 @@
                 <a href="<?= site_url('pelatihan/admin/profil') ?>" class="text-decoration-none d-flex align-items-center overflow-hidden" style="width: 100%;">
                     <img src="https://ui-avatars.com/api/?name=<?= urlencode(session()->get('nama') ?? 'Admin') ?>&background=0f172a&color=fff" class="rounded-circle me-2 shadow-sm flex-shrink-0" width="36">
                     <div class="overflow-hidden" style="min-width: 0; max-width: calc(100% - 44px);">
-                        <div class="fw-bold small text-dark text-truncate" style="max-width: 100%;"><?= session()->get('nama') ?></div>
-                        <div class="text-danger fw-bold" style="font-size: 0.6rem; letter-spacing: 0.5px;">ADMIN DIKLAT</div>
+                        <div class="fw-bold small text-white text-truncate" style="max-width: 100%;"><?= session()->get('nama') ?></div>
+                        <div class="text-white opacity-75 fw-bold" style="font-size: 0.6rem; letter-spacing: 0.5px;">ADMIN DIKLAT</div>
                     </div>
                 </a>
             </div>
@@ -618,8 +618,31 @@
                     }
                 }
 
-                $notifs = array_slice($notifs, 0, 5); // Limit to top 5 in dropdown
-                $unread = count($notifs);
+                $dbNotifs = $db->table('notifikasi_pelatihan')
+                    ->where('user_id', 'admin')
+                    ->orderBy('created_at', 'DESC')
+                    ->limit(10)
+                    ->get()->getResultArray();
+                
+                $unreadDb = 0;
+                foreach($dbNotifs as $dn) {
+                    if($dn['is_read'] == 0) $unreadDb++;
+                    $notifs[] = [
+                        'title' => $dn['title'],
+                        'message' => $dn['message'],
+                        'url' => base_url('pelatihan/admin/verifikasi_pendaftaran'), // Default url
+                        'type' => $dn['type'] ?? 'primary',
+                        'created_at' => date('Y-m-d H:i', strtotime($dn['created_at']))
+                    ];
+                }
+
+                // Sort all notifications by created_at DESC
+                usort($notifs, function($a, $b) {
+                    return strtotime($b['created_at']) - strtotime($a['created_at']);
+                });
+
+                $notifs = array_slice($notifs, 0, 8); // Limit to top 8 in dropdown
+                $unread = $unreadDb > 0 ? $unreadDb : count($notifs);
                 ?>
                 <div class="position-relative dropdown">
                     <button class="btn btn-white btn-sm rounded-circle shadow-sm border p-2" type="button" id="notifDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="width: 38px; height: 38px;">
