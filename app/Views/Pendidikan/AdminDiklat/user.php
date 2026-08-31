@@ -49,8 +49,11 @@
                             <span class="badge bg-info bg-opacity-10 text-info">CI</span>
                         </td>
                         <td class="text-end">
-                            <button class="btn btn-sm btn-outline-primary">
+                            <button class="btn btn-sm btn-outline-primary me-1" onclick="editCI(<?= htmlspecialchars(json_encode($u)) ?>)">
                                 <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteCI(<?= $u['id'] ?>, '<?= esc($u['nama_lengkap'] ?? '') ?>')">
+                                <i class="fas fa-trash"></i>
                             </button>
                         </td>
                     </tr>
@@ -67,6 +70,136 @@
         </table>
     </div>
 </div>
+
+<!-- Modal Edit CI -->
+<div class="modal fade" id="modalEditCI" tabindex="-1">
+    <div class="modal-dialog">
+        <form class="modal-content" id="formEditCI" onsubmit="saveCI(event)">
+            <div class="modal-header bg-primary text-white">
+                <h6 class="modal-title fw-bold"><i class="fas fa-edit me-2"></i>Edit Identitas CI</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="edit_ci_id" name="id">
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Nama Lengkap</label>
+                    <input type="text" class="form-control" id="edit_ci_nama" name="nama_lengkap" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">NIP</label>
+                    <input type="text" class="form-control" id="edit_ci_nip" name="nip">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Email</label>
+                    <input type="email" class="form-control" id="edit_ci_email" name="email" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">No. Telepon</label>
+                    <input type="text" class="form-control" id="edit_ci_telp" name="nomor_telepon">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Profesi</label>
+                    <select class="form-select" id="edit_ci_profesi" name="id_profesi">
+                        <option value="">Pilih Profesi</option>
+                        <?php foreach($profesiList as $p): ?>
+                        <option value="<?= $p['id_profesi'] ?>"><?= esc($p['nama_profesi']) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Unit Kerja</label>
+                    <select class="form-select" id="edit_ci_unit" name="id_unit_kerja">
+                        <option value="">Pilih Unit Kerja</option>
+                        <?php foreach($unitKerjaList as $u): ?>
+                        <option value="<?= $u['id_unit_kerja'] ?>"><?= esc($u['nama_unit']) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                <button type="submit" class="btn btn-primary" id="btnSaveCI">Simpan</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function editCI(data) {
+    document.getElementById('edit_ci_id').value = data.id || '';
+    document.getElementById('edit_ci_nama').value = data.nama_lengkap || '';
+    document.getElementById('edit_ci_nip').value = data.nip || '';
+    document.getElementById('edit_ci_email').value = data.email || '';
+    document.getElementById('edit_ci_telp').value = data.nomor_telepon || '';
+    document.getElementById('edit_ci_profesi').value = data.id_profesi || '';
+    document.getElementById('edit_ci_unit').value = data.id_unit_kerja || '';
+    
+    new bootstrap.Modal(document.getElementById('modalEditCI')).show();
+}
+
+function saveCI(e) {
+    e.preventDefault();
+    const id = document.getElementById('edit_ci_id').value;
+    const form = document.getElementById('formEditCI');
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries());
+    
+    const btn = document.getElementById('btnSaveCI');
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
+    btn.disabled = true;
+
+    fetch('<?= base_url('pendidikan/admin/diklat/api/ci/update') ?>/' + id, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+    .then(res => res.json())
+    .then(res => {
+        if (res.status === 200 || res.success || res.message === 'Data berhasil diupdate') {
+            Swal.fire('Berhasil', 'Data CI berhasil diperbarui.', 'success').then(() => location.reload());
+        } else {
+            Swal.fire('Gagal', res.message || 'Terjadi kesalahan', 'error');
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        Swal.fire('Error', 'Terjadi kesalahan sistem.', 'error');
+    })
+    .finally(() => {
+        btn.innerHTML = 'Simpan';
+        btn.disabled = false;
+    });
+}
+
+function deleteCI(id, nama) {
+    Swal.fire({
+        title: 'Apakah anda benar ingin menghapus user ini?',
+        html: `User <b>${nama}</b> akan dihapus secara permanen.`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Ya, hapus!',
+        cancelButtonText: 'Batal'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch('<?= base_url('pendidikan/admin/diklat/api/ci/delete') ?>/' + id)
+            .then(res => res.json())
+            .then(res => {
+                if (res.status === 200 || res.success || res.message === 'Data berhasil dihapus') {
+                    Swal.fire('Terhapus!', 'User CI berhasil dihapus.', 'success').then(() => location.reload());
+                } else {
+                    Swal.fire('Gagal', res.message || 'Terjadi kesalahan.', 'error');
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                Swal.fire('Error', 'Terjadi kesalahan sistem.', 'error');
+            });
+        }
+    });
+}
+</script>
 
 <?php else: ?>
 <div class="card p-0">

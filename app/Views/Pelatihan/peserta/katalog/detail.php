@@ -287,7 +287,7 @@ $has_progress = $has_progress ?? false;
                     <div class="fs-4 fw-bold text-white mb-3">Rp <?= number_format($p['biaya_nominal'] ?? 0, 0, ',', '.') ?></div>
                     <div class="small text-white opacity-75 mb-1">Transfer Rekening:</div>
                     <div class="bg-white bg-opacity-10 p-2 rounded border border-white border-opacity-10 fw-bold text-white mb-1"><?= $p['nama_bank'] ?? '-' ?></div>
-                    <div class="bg-white bg-opacity-10 p-2 rounded border border-white border-opacity-10 font-monospace text-danger fw-bold mb-1"><?= $p['no_rekening'] ?? '-' ?></div>
+                    <div class="bg-white bg-opacity-10 p-2 rounded border border-white border-opacity-10 font-monospace text-white fw-bold mb-1"><?= $p['no_rekening'] ?? '-' ?></div>
                     <div class="bg-white bg-opacity-10 p-2 rounded border border-white border-opacity-10 small text-white opacity-75">a.n <?= $p['atas_nama'] ?? '-' ?></div>
                 </div>
                 <?php endif; ?>
@@ -326,8 +326,8 @@ $has_progress = $has_progress ?? false;
                                 PELATIHAN BERAKHIR
                             </div>
                         <?php elseif ($is_learning_open): ?>
-                            <a href="<?= base_url('pelatihan/peserta/belajar/'.$p['id']) ?>" class="btn w-100 py-3 rounded-pill fw-bold text-white shadow-lg btn-action btn-mantul" style="background-color: #059669;">
-                                <?= !empty($has_progress) ? 'LANJUTKAN BELAJAR' : 'MULAI BELAJAR' ?> <i class="fas fa-play-circle ms-2"></i>
+                            <a href="<?= base_url('pelatihan/peserta/belajar/'.$p['id']) ?>" class="btn w-100 py-3 rounded-pill fw-bold text-white shadow-lg btn-action d-flex justify-content-center align-items-center gap-2" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); letter-spacing: 1px; border: 1px solid rgba(255,255,255,0.2);">
+                                <span><?= !empty($has_progress) ? 'LANJUTKAN' : 'MULAI' ?></span>
                             </a>
                         <?php else: ?>
                             <div class="alert alert-success border-0 text-center py-3 mb-0 rounded-3 shadow-sm btn-mantul" style="background: rgba(16, 185, 129, 0.1); color: #34d399;">

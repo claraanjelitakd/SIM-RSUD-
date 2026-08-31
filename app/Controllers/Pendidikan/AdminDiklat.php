@@ -312,15 +312,22 @@ class AdminDiklat extends BaseController
         $institusiList = $this->institusiModel->where('status_verifikasi', 'approved')->findAll();
 
         $userList = [];
+        $profesiList = [];
+        $unitKerjaList = [];
         if ($tab === 'ci') {
             $userList = $this->ciModel->findAll();
+            $profesiList = $this->profesiModel->findAll();
+            $unitKerjaList = $this->unitKerjaModel->findAll();
         }
 
         return view('Pendidikan/AdminDiklat/user', [
             'menu' => 'user',
             'tab' => $tab,
             'mahasiswaList' => $mahasiswaList,
+            'institusiList' => $institusiList,
             'userList' => $userList,
+            'profesiList' => $profesiList,
+            'unitKerjaList' => $unitKerjaList,
         ]);
     }
 

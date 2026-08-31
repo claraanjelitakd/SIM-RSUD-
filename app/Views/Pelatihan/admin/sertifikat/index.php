@@ -241,8 +241,21 @@ $templates = $templates ?? [];
                             <?php else: foreach($pejabat as $pj): ?>
                             <tr>
                                 <td class="py-3">
-                                    <div class="fw-bold text-dark"><?= esc($pj['nama_pejabat']) ?></div>
-                                    <div class="text-muted small">NIP: <?= esc($pj['nip_pejabat'] ?? '-') ?></div>
+                                    <div class="d-flex align-items-center">
+                                        <?php if(!empty($pj['foto'])): ?>
+                                            <a href="javascript:void(0)" onclick="previewImage('<?= str_starts_with($pj['foto'], 'uploads/') ? base_url($pj['foto']) : base_url('uploads/pelatihan/'.$pj['foto']) ?>', 'Foto Profil')" title="Preview Foto">
+                                                <img src="<?= str_starts_with($pj['foto'], 'uploads/') ? base_url($pj['foto']) : base_url('uploads/pelatihan/'.$pj['foto']) ?>" class="rounded-circle me-2 border border-secondary shadow-sm" width="35" height="35" style="object-fit:cover;">
+                                            </a>
+                                        <?php else: ?>
+                                            <div class="rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center me-2 fw-bold" style="width:35px;height:35px;font-size:0.75rem;">
+                                                <?= strtoupper(substr($pj['nama_pejabat'], 0, 2)) ?>
+                                            </div>
+                                        <?php endif; ?>
+                                        <div>
+                                            <div class="fw-bold text-dark"><?= esc($pj['nama_pejabat']) ?></div>
+                                            <div class="text-muted small">NIP: <?= esc($pj['nip_pejabat'] ?? '-') ?></div>
+                                        </div>
+                                    </div>
                                 </td>
                                 <td>
                                     <div class="fw-bold text-dark small"><?= esc($pj['jabatan']) ?></div>
@@ -258,6 +271,9 @@ $templates = $templates ?? [];
 
                                 <td class="pe-4 text-center">
                                     <div class="d-flex justify-content-center gap-1">
+                                          <?php if(!empty($pj['ttd_image'])): ?>
+                                              <a href="javascript:void(0)" onclick="previewImage('<?= str_starts_with($pj['ttd_image'], 'uploads/') ? base_url($pj['ttd_image']) : base_url('uploads/pelatihan/'.$pj['ttd_image']) ?>', 'Tanda Tangan')" class="btn btn-outline-info btn-sm rounded-circle border-0" style="width:30px;height:30px;display:inline-flex;align-items:center;justify-content:center;" title="Preview TTD"><i class="fas fa-eye"></i></a>
+                                          <?php endif; ?>
                                         <button class="btn btn-outline-dark btn-sm rounded-circle" onclick='editPejabat(<?= json_encode($pj, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS) ?>)' style="width:30px;height:30px;display:inline-flex;align-items:center;justify-content:center;"><i class="fas fa-edit"></i></button>
                                         <a href="javascript:void(0)" class="btn btn-outline-danger btn-sm rounded-circle border-0" onclick="confirmAction('<?= site_url('pelatihan/admin/certificate/delete_pejabat/'.$pj['id']) ?>', 'Hapus pejabat ini?')" style="width:30px;height:30px;display:inline-flex;align-items:center;justify-content:center; color: #ce2127;"><i class="fas fa-trash"></i></a>
                                     </div>
@@ -1019,7 +1035,29 @@ $templates = $templates ?? [];
         const modal = new bootstrap.Modal(document.getElementById('detailCertModal'));
         modal.show();
     }
+    function previewImage(url, title) {
+        document.getElementById('previewImageSrc').src = url;
+        document.getElementById('previewImageTitle').innerText = title || '';
+        new bootstrap.Modal(document.getElementById('modalPreviewImage')).show();
+    }
 </script>
+
+<!-- Modal Preview Image -->
+<div class="modal fade" id="modalPreviewImage" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-lg bg-transparent">
+            <div class="modal-header border-0 pb-0 justify-content-end">
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" style="background-color: rgba(0,0,0,0.5); border-radius: 50%; padding: 0.5rem;"></button>
+            </div>
+            <div class="modal-body text-center p-0">
+                <div class="bg-white p-3 rounded shadow d-inline-block">
+                    <img id="previewImageSrc" src="" class="img-fluid rounded" style="max-height: 70vh;">
+                </div>
+                <div id="previewImageTitle" class="text-white fw-bold mt-2 fs-5" style="text-shadow: 1px 1px 3px rgba(0,0,0,0.8);"></div>
+            </div>
+        </div>
+    </div>
+</div>
 
 <style>
     .nav-tabs .nav-link { color: #64748b !important; border: none; border-bottom: 3px solid transparent; transition: 0.3s; }

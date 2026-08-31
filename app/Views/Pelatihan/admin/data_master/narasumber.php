@@ -29,9 +29,11 @@
                         <td>
                             <div class="d-flex align-items-center">
                                 <?php if(!empty($item['foto'])): ?>
-                                    <img src="<?= base_url($item['foto']) ?>" class="rounded-circle me-2" width="32" height="32" style="object-fit:cover;">
+                                    <a href="javascript:void(0)" onclick="previewImage('<?= str_starts_with($item['foto'], 'uploads/') ? base_url($item['foto']) : base_url('uploads/pelatihan/'.$item['foto']) ?>', 'Foto Profil')" title="Preview Foto">
+                                        <img src="<?= str_starts_with($item['foto'], 'uploads/') ? base_url($item['foto']) : base_url('uploads/pelatihan/'.$item['foto']) ?>" class="rounded-circle me-2 border border-secondary shadow-sm" width="35" height="35" style="object-fit:cover;">
+                                    </a>
                                 <?php else: ?>
-                                    <div class="rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center me-2 fw-bold" style="width:32px;height:32px;font-size:0.7rem;">
+                                    <div class="rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center me-2 fw-bold" style="width:35px;height:35px;font-size:0.75rem;">
                                         <?= strtoupper(substr($item['nama_pejabat'], 0, 2)) ?>
                                     </div>
                                 <?php endif; ?>
@@ -63,6 +65,9 @@
                         </td>
                         <td class="text-center">
                             <div class="d-flex gap-1 justify-content-center">
+                                <?php if(!empty($item['ttd_image'])): ?>
+                                    <a href="javascript:void(0)" onclick="previewImage('<?= str_starts_with($item['ttd_image'], 'uploads/') ? base_url($item['ttd_image']) : base_url('uploads/pelatihan/'.$item['ttd_image']) ?>', 'Tanda Tangan')" class="btn btn-outline-info btn-sm rounded-circle border-0" style="width:30px;height:30px;display:inline-flex;align-items:center;justify-content:center;" title="Preview TTD"><i class="fas fa-eye"></i></a>
+                                <?php endif; ?>
                                 <button class="btn btn-outline-dark btn-sm rounded-circle" onclick='editNarasumber(<?= json_encode($item, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>)' style="width:30px;height:30px;display:inline-flex;align-items:center;justify-content:center;" title="Edit"><i class="fas fa-edit"></i></button>
                                 <a href="javascript:void(0)" class="btn btn-outline-danger btn-sm rounded-circle border-0" onclick="confirmDelete(<?= $item['id'] ?>)" style="width:30px;height:30px;display:inline-flex;align-items:center;justify-content:center; color:#ce2127;" title="Hapus"><i class="fas fa-trash"></i></a>
                             </div>
@@ -177,8 +182,24 @@
     </div>
 </div>
 
-<?= $this->endSection() ?>
+<!-- Modal Preview Image -->
+<div class="modal fade" id="modalPreviewImage" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-lg bg-transparent">
+            <div class="modal-header border-0 pb-0 justify-content-end">
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" style="background-color: rgba(0,0,0,0.5); border-radius: 50%; padding: 0.5rem;"></button>
+            </div>
+            <div class="modal-body text-center p-0">
+                <div class="bg-white p-3 rounded shadow d-inline-block">
+                    <img id="previewImageSrc" src="" class="img-fluid rounded" style="max-height: 70vh;">
+                </div>
+                <div id="previewImageTitle" class="text-white fw-bold mt-2 fs-5" style="text-shadow: 1px 1px 3px rgba(0,0,0,0.8);"></div>
+            </div>
+        </div>
+    </div>
+</div>
 
+<?= $this->endSection() ?>
 <?= $this->section('scripts') ?>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -214,6 +235,12 @@
         confirmAction('Hapus Narasumber?', 'Data narasumber akan dihapus permanen dari sistem.', function() {
             location.href = "<?= base_url('pelatihan/admin/master/hapus_narasumber/') ?>" + id;
         });
+    }
+
+    function previewImage(url, title) {
+        document.getElementById('previewImageSrc').src = url;
+        document.getElementById('previewImageTitle').innerText = title || '';
+        new bootstrap.Modal(document.getElementById('modalPreviewImage')).show();
     }
 </script>
 <?= $this->endSection() ?>

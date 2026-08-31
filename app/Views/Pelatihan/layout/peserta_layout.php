@@ -156,11 +156,12 @@ try {
             font-weight: 800;
             letter-spacing: 0.2px;
             margin-bottom: 0.15rem;
+            color: #ffffff !important;
         }
 
         .notification-popup .popup-message {
             font-size: 0.85rem;
-            color: rgba(255, 255, 255, 0.86);
+            color: #ffffff !important;
             line-height: 1.5;
         }
 
@@ -537,20 +538,20 @@ try {
                                     </span>
                                 <?php endif; ?>
                             </a>
-                            <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg mt-2 p-3 rounded-lg" style="min-width: 200px;">
-                                <li><a class="dropdown-item py-2 px-3 rounded-lg fw-bold small mb-1" href="<?= site_url('pelatihan/peserta/profil') ?>"><i class="fas fa-user-edit me-2 text-danger"></i> Profil Saya</a></li>
+                            <ul class="dropdown-menu dropdown-menu-end border-0 shadow mt-2 p-2 rounded-3" style="min-width: 200px;">
+                                <li><a class="dropdown-item py-2 px-3 rounded-2 fw-semibold small mb-1 text-secondary" href="<?= site_url('pelatihan/peserta/profil') ?>"><i class="far fa-user me-2" style="width: 16px; text-align: center;"></i> Profil Saya</a></li>
                                 <li>
-                                    <a class="dropdown-item py-2 px-3 rounded-lg fw-bold small mb-1 d-flex justify-content-between align-items-center" href="<?= site_url('pelatihan/peserta/notifikasi') ?>">
-                                        <span><i class="fas fa-bell me-2 text-warning"></i> Notifikasi</span>
+                                    <a class="dropdown-item py-2 px-3 rounded-2 fw-semibold small mb-1 d-flex justify-content-between align-items-center text-secondary" href="<?= site_url('pelatihan/peserta/notifikasi') ?>">
+                                        <span><i class="far fa-bell me-2" style="width: 16px; text-align: center;"></i> Notifikasi</span>
                                         <?php if ($notifCount > 0): ?>
                                             <span class="badge bg-danger rounded-pill"><?= $notifCount ?></span>
                                         <?php endif; ?>
                                     </a>
                                 </li>
                                 <li>
-                                    <hr class="dropdown-divider opacity-10">
+                                    <hr class="dropdown-divider my-1 border-secondary border-opacity-25">
                                 </li>
-                                <li><a class="dropdown-item py-2 px-3 rounded-lg fw-bold small text-danger" href="<?= site_url('pelatihan/logout') ?>"><i class="fas fa-power-off me-2"></i> Keluar</a></li>
+                                <li><a class="dropdown-item py-2 px-3 rounded-2 fw-semibold small text-danger" href="<?= site_url('pelatihan/logout') ?>"><i class="fas fa-sign-out-alt me-2" style="width: 16px; text-align: center;"></i> Keluar</a></li>
                             </ul>
                         </li>
                     </ul>

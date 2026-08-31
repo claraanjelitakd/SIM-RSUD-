@@ -34,7 +34,7 @@ $subMenu = $subMenu ?? '';
             </a>
 
             <a class="nav-link <?= ($menu === 'user') ? 'active' : '' ?>" href="<?= base_url('pendidikan/admin/diklat/user') ?>">
-                <i class="fas fa-users"></i> Mahasiswa & Akun
+                <i class="fas fa-users"></i> Akun
             </a>
             
             <div class="px-4 mb-2 mt-4">
