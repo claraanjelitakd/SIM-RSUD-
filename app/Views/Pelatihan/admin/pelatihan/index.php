@@ -298,8 +298,8 @@ function getComputedStatus($p) {
             toggleClosedFields('Terbuka');
             $('#f_target_khusus_profesi').val(null).trigger('change');
             $('#f_target_khusus_unit').val(null).trigger('change');
-            $('#f_narasumber').empty().trigger('change');
-            $('#f_penyelenggara').empty().trigger('change');
+            $('#f_narasumber').val(null).trigger('change');
+            $('#f_penyelenggara').val(null).trigger('change');
             // Update categories for the currently selected (first) ranah
             const firstRanah = document.getElementById('f_ranah_skp');
             if (firstRanah && firstRanah.value) updateTrainingCategories(firstRanah.value);

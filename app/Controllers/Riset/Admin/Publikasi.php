@@ -167,24 +167,13 @@ class Publikasi extends BaseController
             return redirect()->back()->with('error', 'Data publikasi tidak ditemukan.');
         }
 
-        $dokumen = null;
-
-        if ($publikasi['tujuan_laporan'] === 'izin') {
-            // Prioritaskan Surat Izin Publikasi Resmi untuk izin publikasi
-            $dokumen = $this->dokumenModel->where('pengajuan_riset_id', $id)
-                                          ->where('jenis_dokumen', 'Surat Izin Publikasi Resmi')
-                                          ->first();
-        }
-
-        // Jika tidak ada atau bukan izin, cari dokumen artikel/laporan
-        if (!$dokumen || empty($dokumen['file_path'])) {
-            $dokumen = $this->dokumenModel->where('pengajuan_riset_id', $id)
-                                          ->groupStart()
-                                            ->where('jenis_dokumen', 'draft_artikel')
-                                            ->orWhere('jenis_dokumen', 'publikasi')
-                                          ->groupEnd()
-                                          ->first();
-        }
+        // Cari dokumen artikel/laporan (selalu disimpan sebagai 'draft_artikel' pada form submission)
+        $dokumen = $this->dokumenModel->where('pengajuan_riset_id', $id)
+                                      ->groupStart()
+                                        ->where('jenis_dokumen', 'draft_artikel')
+                                        ->orWhere('jenis_dokumen', 'publikasi')
+                                      ->groupEnd()
+                                      ->first();
 
         if ($dokumen && !empty($dokumen['file_path'])) {
             return redirect()->to(base_url($dokumen['file_path']));
