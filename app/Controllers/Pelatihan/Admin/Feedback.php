@@ -54,12 +54,14 @@ class Feedback extends BaseController
                               ->where('peserta_kuesioner_rating_pelatihan.peserta_pelat_id', $pl['id'])
                               ->get()->getResultArray();
 
-                // Group jawaban by category
+                // Group jawaban by Sesi, then Category
                 $jawabanDetail = [];
                 foreach ($jawaban as $j) {
+                    $sesi = !empty($j['nama_sesi']) ? $j['nama_sesi'] : 'Keseluruhan';
                     $kat = $j['kategori'];
-                    if (!isset($jawabanDetail[$kat])) $jawabanDetail[$kat] = [];
-                    $jawabanDetail[$kat][] = $j;
+                    if (!isset($jawabanDetail[$sesi])) $jawabanDetail[$sesi] = [];
+                    if (!isset($jawabanDetail[$sesi][$kat])) $jawabanDetail[$sesi][$kat] = [];
+                    $jawabanDetail[$sesi][$kat][] = $j;
                 }
 
                 $feedbacks[] = [
@@ -111,6 +113,28 @@ class Feedback extends BaseController
             'feedbacks' => $feedbacks,
             'questionStats' => $questionStats
         ];
+
+        // ─── Aggregate ratings by Sesi ───────────────────────────────────────
+        $sesiStats = [];
+        $sesiList = $db->table('sesi_interaktif_pelatihan')->where('pelatihan_id', $id)->get()->getResultArray();
+        foreach ($sesiList as $sesi) {
+            $ratingsForSesi = $db->table('peserta_kuesioner_rating_pelatihan')
+                ->select('peserta_kuesioner_rating_pelatihan.kuesioner_id, kuesioner_master_pelatihan.pertanyaan, AVG(peserta_kuesioner_rating_pelatihan.nilai_rating) as avg_rating, COUNT(peserta_kuesioner_rating_pelatihan.id) as total_votes')
+                ->join('kuesioner_master_pelatihan', 'kuesioner_master_pelatihan.id = peserta_kuesioner_rating_pelatihan.kuesioner_id', 'left')
+                ->where('peserta_kuesioner_rating_pelatihan.sesi_id', $sesi['id'])
+                ->groupBy('peserta_kuesioner_rating_pelatihan.kuesioner_id')
+                ->get()->getResultArray();
+            if (!empty($ratingsForSesi)) {
+                $sesiStats[] = [
+                    'id'   => $sesi['id'],
+                    'nama' => $sesi['nama_sesi'],
+                    'pertanyaan' => array_map(function($r) {
+                        return ['pertanyaan' => $r['pertanyaan'], 'avg_rating' => round((float)$r['avg_rating'], 1), 'total_votes' => (int)$r['total_votes']];
+                    }, $ratingsForSesi),
+                    'avg_overall' => count($ratingsForSesi) > 0 ? round(array_sum(array_column($ratingsForSesi, 'avg_rating')) / count($ratingsForSesi), 1) : 0,
+                ];
+            }
+        }
 
         // ─── Aggregate ratings by Materi ─────────────────────────────────────
         $materiStats = [];
@@ -189,6 +213,7 @@ class Feedback extends BaseController
         $data['materiStats']       = $materiStats;
         $data['narasumberStats']   = $narasumberStats;
         $data['penyelenggaraStats'] = $penyelenggaraStats;
+        $data['sesiStats']         = $sesiStats;
 
         return view('Pelatihan/admin/feedback/detail', $data);
     }

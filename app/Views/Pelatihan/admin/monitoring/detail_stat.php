@@ -10,6 +10,7 @@
     .table-detail th { font-size: 0.75rem; text-transform: uppercase; color: #6c757d; }
     .table-detail td { font-size: 0.82rem; vertical-align: middle; }
     .badge-jpl { font-size: 0.7rem; }
+    .rounded-custom { border-radius: 1rem !important; }
 </style>
 
 <div class="container-fluid px-3">
@@ -89,7 +90,7 @@
                                     <td class="text-center"><?= $statusBadge ?></td>
                                     <td class="text-center pe-3">
                                         <button class="btn btn-xs btn-outline-primary rounded-pill fw-bold px-2 py-0" style="font-size:0.65rem;"
-                                            onclick='openHistoryModal(<?= json_encode(["nik"=>$s["nik"],"nama"=>$s["nama"]]) ?>)'>
+                                            onclick='openHistoryModal(<?= json_encode($s) ?>)'>
                                             <i class="fas fa-history"></i> Riwayat
                                         </button>
                                         <?php if ($s['jpl'] < $s['target_jpl'] && !$isInactive): ?>
@@ -114,17 +115,40 @@
 
 <!-- Modal Riwayat JPL -->
 <div class="modal fade" id="modalHistory" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content rounded-4 border-0 shadow">
-            <div class="modal-header border-0 pb-0">
-                <div>
-                    <h6 class="fw-bold text-dark mb-0">Riwayat JPL Karyawan</h6>
-                    <small class="text-muted" id="histInfo"></small>
-                </div>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-custom">
+            <div class="modal-header bg-light border-0 px-4 py-3">
+                <h5 class="modal-title fw-bold text-dark"><i class="fas fa-history text-danger me-2"></i> Riwayat JPL Karyawan</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
-                <div id="historyContent" class="text-center text-muted py-4">Memuat data...</div>
+            <div class="modal-body px-4 py-3">
+                <div class="d-flex align-items-center mb-4 p-3 bg-light rounded-custom border">
+                    <div class="avatar bg-dark text-white rounded-circle p-2.5 me-3 text-center d-flex align-items-center justify-content-center fw-bold" style="width: 42px; height: 42px; border: 2px solid #ce2127;">
+                        <span id="histAvatar">?</span>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-0 text-dark id-text" id="histNama">-</h6>
+                        <span class="text-muted small font-monospace" id="histNik">-</span>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-bold text-dark small text-uppercase mb-0">Pelatihan Yang Diselesaikan:</h6>
+                    <select id="histYearFilter" class="form-select form-select-sm border-dark w-auto fw-bold" onchange="fetchHistory()">
+                        <?php
+                        $curYear = date('Y');
+                        for ($y = $curYear; $y >= $curYear - 3; $y--):
+                        ?>
+                            <option value="<?= $y ?>" <?= $selectedYear == $y ? 'selected' : '' ?>><?= $y ?></option>
+                        <?php endfor; ?>
+                    </select>
+                </div>
+                <div id="historyListContainer" class="list-group list-group-flush" style="max-height: 250px; overflow-y: auto;"></div>
+            </div>
+            <div class="modal-footer bg-light border-0 px-4 py-2 d-flex justify-content-between">
+                <button type="button" class="btn btn-outline-warning rounded-pill px-4 fw-bold small" onclick="let emp=statsGlobal.find(s=>s.nik===currentHistoryNik);if(emp)openRemindModal({nik:emp.nik,nama:emp.nama,jpl:emp.jpl,target:emp.target_jpl,kurang:Math.max(0,emp.target_jpl-emp.jpl)});">
+                    <i class="fas fa-bell me-1"></i> Kirim Notifikasi
+                </button>
+                <button type="button" class="btn btn-dark rounded-pill px-4 fw-bold small" data-bs-dismiss="modal">Tutup</button>
             </div>
         </div>
     </div>
@@ -151,31 +175,69 @@ $(document).ready(function() {
     });
 });
 
+let currentHistoryNik = null;
+let currentHistoryUser = null;
+const statsGlobal = <?= json_encode($stats) ?>;
+
 function openHistoryModal(user) {
-    document.getElementById('histInfo').innerText = user.nama.toUpperCase() + ' — ' + user.nik;
-    let modal = new bootstrap.Modal(document.getElementById('modalHistory'));
-    modal.show();
+    currentHistoryNik = user.nik;
+    currentHistoryUser = user;
+    document.getElementById('histNama').innerText = user.nama.toUpperCase();
+    document.getElementById('histNik').innerText = user.nik;
+    document.getElementById('histAvatar').innerText = user.nama.charAt(0).toUpperCase();
 
-    document.getElementById('historyContent').innerHTML = '<div class="spinner-border text-primary" role="status"></div>';
+    let historyModalEl = document.getElementById('modalHistory');
+    let modalInstance = bootstrap.Modal.getInstance(historyModalEl);
+    if (!modalInstance) modalInstance = new bootstrap.Modal(historyModalEl);
+    modalInstance.show();
 
-    fetch('<?= site_url("pelatihan/admin/monitoring/jpl_history/" ) ?>' + user.nik + '?tahun=<?= $selectedYear ?>')
-        .then(r => r.json())
-        .then(data => {
-            if (data.length === 0) {
-                document.getElementById('historyContent').innerHTML = '<p class="text-muted">Belum ada riwayat pelatihan.</p>';
-                return;
-            }
-            let html = '<div class="table-responsive"><table class="table table-sm table-hover align-middle mb-0" style="font-size:0.8rem;">';
-            html += '<thead class="table-light"><tr><th>Pelatihan</th><th class="text-center">JPL</th><th>Tanggal</th></tr></thead><tbody>';
-            data.forEach(h => {
-                html += '<tr><td class="fw-bold text-dark">' + h.nama + '</td><td class="text-center"><span class="badge bg-primary rounded-pill">' + h.jpl + ' JPL</span></td><td class="text-muted">' + h.tanggal + '</td></tr>';
-            });
-            html += '</tbody></table></div>';
-            document.getElementById('historyContent').innerHTML = html;
-        })
-        .catch(() => {
-            document.getElementById('historyContent').innerHTML = '<p class="text-danger">Gagal memuat data riwayat.</p>';
-        });
+    fetchHistory();
+}
+
+function fetchHistory() {
+    if (!currentHistoryUser) return;
+
+    let container = document.getElementById('historyListContainer');
+    let year = document.getElementById('histYearFilter').value;
+    
+    container.innerHTML = '';
+    
+    let filtered = currentHistoryUser.history.filter(item => {
+        if (!item.tanggal || item.tanggal === '-') return false;
+        return item.tanggal.endsWith(year);
+    });
+
+    if (filtered.length === 0) {
+        container.innerHTML = `<div class="text-center py-4 text-muted small"><i class="fas fa-folder-open fa-2x mb-2 d-block opacity-25"></i> Tidak ada data riwayat JPL untuk tahun ${year}.</div>`;
+        return;
+    }
+
+    filtered.forEach(item => {
+        let namaParts = item.nama.match(/^\[(.*?)\] (.*)$/);
+        let badgeColor = 'bg-primary';
+        let jenisTxt = 'Lainnya';
+        let judul = item.nama;
+
+        if (namaParts) {
+            jenisTxt = namaParts[1];
+            judul = namaParts[2];
+            if (jenisTxt.includes('Internal')) badgeColor = 'bg-danger';
+            if (jenisTxt.includes('Eksternal')) badgeColor = 'bg-primary';
+        }
+
+        container.innerHTML += `
+            <div class="list-group-item px-3 py-2.5 border-bottom border-light">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="small fw-bold text-dark text-truncate" style="max-width:70%;" title="${judul}">${judul}</div>
+                    <span class="badge bg-dark rounded-pill px-2.5 py-1 fw-bold" style="font-size:0.6rem;">+${item.jpl} JPL</span>
+                </div>
+                <div class="small text-muted mt-1 d-flex justify-content-between align-items-center" style="font-size:0.65rem;">
+                    <span>Tgl: ${item.tanggal}</span>
+                    <span class="badge ${badgeColor} rounded-pill" style="font-size:0.55rem;">${jenisTxt}</span>
+                </div>
+            </div>
+        `;
+    });
 }
 
 function openRemindModal(user) {

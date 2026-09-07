@@ -450,6 +450,10 @@ class ManajemenPeserta extends BaseController
                 $filtered = array_filter($stats, fn($s) => $s['pelatihan'] === 'Belum Ada');
                 $title = 'Karyawan Tidak Aktif';
                 break;
+            case '20jpl':
+                $filtered = array_filter($stats, fn($s) => $s['jpl'] >= 20);
+                $title = 'Karyawan dengan Capaian ≥ 20 JPL';
+                break;
             default:
                 return redirect()->to('/pelatihan/admin/monitoring');
         }
@@ -485,7 +489,7 @@ class ManajemenPeserta extends BaseController
         $fallbackByUser = [];
 
         if (!empty($niks)) {
-            $allCompletedPelat = $pesertaPelatihanModel->select('peserta_pelatihan.user_id, master_pelatihan.jpl, master_pelatihan.jadwal_selesai')
+            $allCompletedPelat = $pesertaPelatihanModel->select('peserta_pelatihan.user_id, master_pelatihan.nama as judul, master_pelatihan.jpl, master_pelatihan.jadwal_mulai as tgl_mulai, master_pelatihan.jadwal_selesai as tgl_selesai')
                 ->join('master_pelatihan', 'master_pelatihan.id = peserta_pelatihan.pelatihan_id')
                 ->whereIn('peserta_pelatihan.user_id', $niks)
                 ->where('peserta_pelatihan.status_peserta', 'Lulus')
@@ -505,7 +509,7 @@ class ManajemenPeserta extends BaseController
             }
 
             $rsudFallbackCerts = $db->table('sertifikat_pelatihan sp')
-                ->select('sp.user_id, sp.skp, sp.tgl_selesai, sp.judul')
+                ->select('sp.user_id, sp.skp, sp.tgl_mulai, sp.tgl_selesai, sp.judul, sp.penerbit, sp.jenis_dokumen, sp.created_at')
                 ->whereIn('sp.user_id', $niks)
                 ->where('sp.verifikasi', 'approved')
                 ->where('sp.jenis_dokumen', 'rsud')
@@ -621,6 +625,17 @@ class ManajemenPeserta extends BaseController
         $sheet->getStyle('A7')->applyFromArray($summaryStyle);
         $sheet->getStyle('B7')->applyFromArray(['font' => ['bold' => true, 'size' => 12, 'color' => ['rgb' => '0D6EFD']]]);
 
+        $pegawai20 = 0;
+        foreach ($rows as $r) {
+            if ($r['jpl'] >= 20) $pegawai20++;
+        }
+        $persen20 = $count > 0 ? round(($pegawai20 / $count) * 100, 1) : 0;
+
+        $sheet->setCellValue('A8', 'Persentase ≥ 20 JPL');
+        $sheet->setCellValue('B8', $persen20 . '% (' . $pegawai20 . ' pegawai)');
+        $sheet->getStyle('A8')->applyFromArray($summaryStyle);
+        $sheet->getStyle('B8')->applyFromArray(['font' => ['bold' => true, 'size' => 12, 'color' => ['rgb' => '198754']]]);
+
         // Helper: convert column index to letter
         $colLetter = function($n) {
             $s = '';
@@ -630,11 +645,11 @@ class ManajemenPeserta extends BaseController
 
         // Header row
         $headers = ['No', 'Nama', 'NIK', 'Profesi', 'Ruangan', 'Capaian JPL', 'Target JPL'];
-        $headerRow = 9;
+        $headerRow = 10;
         foreach ($headers as $col => $val) {
             $sheet->setCellValue($colLetter($col + 1) . $headerRow, $val);
         }
-        $sheet->getStyle('A9:G9')->applyFromArray($headerStyle);
+        $sheet->getStyle('A10:G10')->applyFromArray($headerStyle);
 
         // Data rows
         foreach ($rows as $i => $r) {
@@ -670,6 +685,127 @@ class ManajemenPeserta extends BaseController
         $sheet->getColumnDimension('E')->setWidth(22);
         $sheet->getColumnDimension('F')->setWidth(15);
         $sheet->getColumnDimension('G')->setWidth(15);
+
+        // === SHEET 2: DETAIL RIWAYAT ===
+        $sheet2 = $spreadsheet->createSheet();
+        $sheet2->setTitle('Detail Riwayat');
+
+        $sheet2->mergeCells('A1:K1');
+        $sheet2->setCellValue('A1', 'Monitoring JPL Pegawai');
+        $sheet2->mergeCells('A2:K2');
+        $sheet2->setCellValue('A2', 'RSUD Kota Yogyakarta');
+        
+        $currentMonthName = strtoupper(date('F'));
+        $sheet2->mergeCells('A3:K3');
+        $sheet2->setCellValue('A3', 'BULAN ' . $currentMonthName);
+        $sheet2->mergeCells('A4:K4');
+        $sheet2->setCellValue('A4', 'Tahun ' . $selectedYear);
+
+        $sheet2->getStyle('A1:K2')->applyFromArray(['font' => ['bold' => true, 'size' => 16], 'alignment' => ['horizontal' => 'center']]);
+        $sheet2->getStyle('A3:K3')->applyFromArray(['font' => ['bold' => true, 'size' => 14, 'color' => ['rgb' => 'FFFFFF']], 'fill' => ['fillType' => 'solid', 'startColor' => ['rgb' => 'FF0000']], 'alignment' => ['horizontal' => 'center']]);
+        $sheet2->getStyle('A4:K4')->applyFromArray(['font' => ['bold' => true, 'size' => 14], 'alignment' => ['horizontal' => 'center']]);
+
+        $headers2 = ['NO', 'NIK', 'NAMA', 'TANGGAL', 'TEMPAT', 'JENIS', 'ACARA', 'PENYELENGGARA', 'TANGGAL MULAI', 'TANGGAL SELESAI', 'JPL'];
+        $headerRow2 = 6;
+        foreach ($headers2 as $col => $val) {
+            $sheet2->setCellValue($colLetter($col + 1) . $headerRow2, $val);
+        }
+        $headerStyle2 = [
+            'font' => ['bold' => true],
+            'alignment' => ['horizontal' => 'center', 'vertical' => 'center'],
+            'borders' => ['allBorders' => ['borderStyle' => 'thin', 'color' => ['rgb' => '000000']]]
+        ];
+        $sheet2->getStyle('A6:K6')->applyFromArray($headerStyle2);
+
+        $row2 = 7;
+        $no2 = 1;
+
+        foreach ($dbUsers as $u) {
+            $nik = $u['nik'];
+            $nama = $u['nama_lengkap'];
+
+            $userHistories = [];
+            foreach (($pelatByUser[$nik] ?? []) as $cp) {
+                $y = !empty($cp['tgl_selesai']) ? date('Y', strtotime($cp['tgl_selesai'])) : date('Y');
+                if ($y == $selectedYear) {
+                    $userHistories[] = [
+                        'tanggal' => !empty($cp['tgl_selesai']) ? date('d/m/Y', strtotime($cp['tgl_selesai'])) : '-',
+                        'tempat' => $cp['tempat'] ?? 'RSUD Kota Yogyakarta',
+                        'jenis' => 'Internal',
+                        'acara' => $cp['judul'],
+                        'penyelenggara' => 'RSUD Kota Yogyakarta',
+                        'tgl_mulai' => !empty($cp['tgl_mulai']) ? date('d/m/Y', strtotime($cp['tgl_mulai'])) : '-',
+                        'tgl_selesai' => !empty($cp['tgl_selesai']) ? date('d/m/Y', strtotime($cp['tgl_selesai'])) : '-',
+                        'jpl' => (float)($cp['jpl'] ?? 0),
+                    ];
+                }
+            }
+            foreach (($certsByUser[$nik] ?? []) as $ac) {
+                $y = !empty($ac['tgl_selesai']) ? date('Y', strtotime($ac['tgl_selesai'])) : date('Y');
+                if ($y == $selectedYear) {
+                    $tgl = !empty($ac['created_at']) ? date('d/m/Y', strtotime($ac['created_at'])) : (!empty($ac['tgl_selesai']) ? date('d/m/Y', strtotime($ac['tgl_selesai'])) : '-');
+                    $userHistories[] = [
+                        'tanggal' => $tgl,
+                        'tempat' => $ac['tempat'] ?? '-',
+                        'jenis' => ucfirst($ac['jenis_dokumen']),
+                        'acara' => $ac['judul'],
+                        'penyelenggara' => $ac['penerbit'] ?? '-',
+                        'tgl_mulai' => !empty($ac['tgl_mulai']) ? date('d/m/Y', strtotime($ac['tgl_mulai'])) : '-',
+                        'tgl_selesai' => !empty($ac['tgl_selesai']) ? date('d/m/Y', strtotime($ac['tgl_selesai'])) : '-',
+                        'jpl' => (float)($ac['skp'] ?? 0), 
+                    ];
+                }
+            }
+            foreach (($fallbackByUser[$nik] ?? []) as $rc) {
+                $y = !empty($rc['tgl_selesai']) ? date('Y', strtotime($rc['tgl_selesai'])) : date('Y');
+                if ($y == $selectedYear) {
+                    $tgl = !empty($rc['created_at']) ? date('d/m/Y', strtotime($rc['created_at'])) : (!empty($rc['tgl_selesai']) ? date('d/m/Y', strtotime($rc['tgl_selesai'])) : '-');
+                    $userHistories[] = [
+                        'tanggal' => $tgl,
+                        'tempat' => $rc['tempat'] ?? 'RSUD Kota Yogyakarta',
+                        'jenis' => 'Internal/Fallback',
+                        'acara' => $rc['judul'],
+                        'penyelenggara' => $rc['penerbit'] ?? 'RSUD Kota Yogyakarta',
+                        'tgl_mulai' => !empty($rc['tgl_mulai']) ? date('d/m/Y', strtotime($rc['tgl_mulai'])) : '-',
+                        'tgl_selesai' => !empty($rc['tgl_selesai']) ? date('d/m/Y', strtotime($rc['tgl_selesai'])) : '-',
+                        'jpl' => (float)($rc['skp'] ?? 0),
+                    ];
+                }
+            }
+
+            if (!empty($userHistories)) {
+                $first = true;
+                foreach ($userHistories as $uh) {
+                    $sheet2->setCellValue('A' . $row2, $first ? $no2++ : '');
+                    $sheet2->setCellValueExplicit('B' . $row2, $first ? $nik : '', \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+                    $sheet2->setCellValue('C' . $row2, $first ? $nama : '');
+                    
+                    $sheet2->setCellValue('D' . $row2, $uh['tanggal']);
+                    $sheet2->setCellValue('E' . $row2, $uh['tempat']);
+                    $sheet2->setCellValue('F' . $row2, $uh['jenis']);
+                    $sheet2->setCellValue('G' . $row2, $uh['acara']);
+                    $sheet2->setCellValue('H' . $row2, $uh['penyelenggara']);
+                    $sheet2->setCellValue('I' . $row2, $uh['tgl_mulai']);
+                    $sheet2->setCellValue('J' . $row2, $uh['tgl_selesai']);
+                    $sheet2->setCellValue('K' . $row2, $uh['jpl'] > 0 ? $uh['jpl'] : '');
+                    
+                    $sheet2->getStyle('A' . $row2 . ':K' . $row2)->applyFromArray([
+                        'borders' => ['allBorders' => ['borderStyle' => 'thin', 'color' => ['rgb' => '000000']]]
+                    ]);
+                    
+                    $row2++;
+                    $first = false;
+                }
+            }
+        }
+        
+        foreach(range('A','K') as $columnID) {
+            $sheet2->getColumnDimension($columnID)->setAutoSize(true);
+        }
+        $sheet2->getColumnDimension('G')->setWidth(40);
+        $sheet2->getColumnDimension('H')->setWidth(30);
+
+        $spreadsheet->setActiveSheetIndex(0);
 
         $fileName = 'Riwayat_JPL_Peserta_' . $selectedYear . '.xlsx';
         $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
@@ -1713,6 +1849,17 @@ class ManajemenPeserta extends BaseController
         $sheet3 = $spreadsheet->createSheet();
         $sheet3->setTitle('Data Feedback');
 
+        // Fetch all distinct columns first
+        $distinctCols = $db->table('peserta_kuesioner_rating_pelatihan pkr')
+            ->select('pkr.kuesioner_id, pkr.sesi_id, k.pertanyaan, s.nama_sesi, cat.nama_kategori as kategori, AVG(pkr.nilai_rating) as avg_rating')
+            ->join('kuesioner_master_pelatihan k', 'k.id = pkr.kuesioner_id', 'left')
+            ->join('kategori_evaluasi_pelatihan cat', 'cat.id = k.kategori_id', 'left')
+            ->join('sesi_interaktif_pelatihan s', 's.id = pkr.sesi_id', 'left')
+            ->join('peserta_pelatihan pp', 'pp.id = pkr.peserta_pelat_id')
+            ->where('pp.pelatihan_id', $pelatihanId)
+            ->groupBy('pkr.kuesioner_id, pkr.sesi_id')
+            ->get()->getResultArray();
+
         // Fetch data
         $totalRating = 0;
         $countFb = 0;
@@ -1726,12 +1873,13 @@ class ManajemenPeserta extends BaseController
                 $komentar = $saran['saran_masukan'];
                 
                 $jawaban = $db->table('peserta_kuesioner_rating_pelatihan')
-                              ->select('kuesioner_id, nilai_rating')
+                              ->select('kuesioner_id, sesi_id, nilai_rating')
                               ->where('peserta_pelat_id', $pl['id'])
                               ->get()->getResultArray();
                 $jawabanMap = [];
                 foreach ($jawaban as $j) {
-                    $jawabanMap[$j['kuesioner_id']] = $j['nilai_rating'];
+                    $key = $j['kuesioner_id'] . '_' . $j['sesi_id'];
+                    $jawabanMap[$key] = $j['nilai_rating'];
                 }
 
                 $feedbacks[] = [
@@ -1745,12 +1893,6 @@ class ManajemenPeserta extends BaseController
             }
         }
         $avgFb = $countFb > 0 ? round($totalRating / $countFb, 1) : 0;
-
-        $questions = $db->table('kuesioner_master_pelatihan')
-            ->select('kuesioner_master_pelatihan.*, kategori_evaluasi_pelatihan.nama_kategori as kategori')
-            ->join('kategori_evaluasi_pelatihan', 'kategori_evaluasi_pelatihan.id = kuesioner_master_pelatihan.kategori_id', 'left')
-            ->where('pelatihan_id', $pelatihanId)
-            ->get()->getResultArray();
 
         // 1. Overall Summary
         $sheet3->setCellValue('A1', 'SUMMARY FEEDBACK PELATIHAN');
@@ -1770,29 +1912,31 @@ class ManajemenPeserta extends BaseController
         $rowF++;
         
         $sheet3->setCellValue('A'.$rowF, 'Kategori');
-        $sheet3->setCellValue('B'.$rowF, 'Pertanyaan');
-        $sheet3->setCellValue('C'.$rowF, 'Rata-rata Rating');
-        $sheet3->getStyle('A'.$rowF.':C'.$rowF)->getFont()->setBold(true);
+        $sheet3->setCellValue('B'.$rowF, 'Sesi');
+        $sheet3->setCellValue('C'.$rowF, 'Pertanyaan');
+        $sheet3->setCellValue('D'.$rowF, 'Rata-rata Rating');
+        $sheet3->getStyle('A'.$rowF.':D'.$rowF)->getFont()->setBold(true);
         $rowF++;
 
-        $qOrder = []; // Store question IDs to map columns later
-        foreach ($questions as $q) {
-            $qOrder[] = $q['id'];
+        $qOrder = []; // Store column keys to map detail columns later
+        foreach ($distinctCols as $c) {
+            $key = $c['kuesioner_id'] . '_' . $c['sesi_id'];
+            $qOrder[] = [
+                'key' => $key,
+                'header' => ($c['nama_sesi'] ? '['.$c['nama_sesi'].'] ' : '') . $c['pertanyaan']
+            ];
             
-            $ratingStat = $db->table('peserta_kuesioner_rating_pelatihan')
-                ->selectAvg('nilai_rating')
-                ->where('kuesioner_id', $q['id'])
-                ->get()->getRowArray();
-            $qAvg = $ratingStat['nilai_rating'] ? round($ratingStat['nilai_rating'], 1) : 0;
+            $qAvg = $c['avg_rating'] ? round($c['avg_rating'], 1) : 0;
 
-            $sheet3->setCellValue('A'.$rowF, $q['kategori'] ?? 'Lainnya');
-            $sheet3->setCellValue('B'.$rowF, $q['pertanyaan']);
-            $sheet3->setCellValue('C'.$rowF, $qAvg);
+            $sheet3->setCellValue('A'.$rowF, $c['kategori'] ?? 'Lainnya');
+            $sheet3->setCellValue('B'.$rowF, $c['nama_sesi'] ?: '-');
+            $sheet3->setCellValue('C'.$rowF, $c['pertanyaan']);
+            $sheet3->setCellValue('D'.$rowF, $qAvg);
             $rowF++;
         }
         
-        $sheet3->getColumnDimension('B')->setWidth(50);
-        $sheet3->getColumnDimension('C')->setWidth(20);
+        $sheet3->getColumnDimension('C')->setWidth(50);
+        $sheet3->getColumnDimension('D')->setWidth(20);
 
         // 3. Detail Per Peserta
         $rowF += 2;
@@ -1806,10 +1950,9 @@ class ManajemenPeserta extends BaseController
         $sheet3->setCellValue('C'.$rowF, 'Rating Umum');
         $sheet3->setCellValue('D'.$rowF, 'Saran & Masukan');
         
-        // Multi-letter column logic for dynamic columns (up to ZZZ if needed, though unlikely)
         $col = 'E';
-        foreach ($questions as $q) {
-            $sheet3->setCellValue($col.$rowF, $q['pertanyaan']);
+        foreach ($qOrder as $q) {
+            $sheet3->setCellValue($col.$rowF, $q['header']);
             $sheet3->getColumnDimension($col)->setWidth(30);
             $col++;
         }
@@ -1825,8 +1968,8 @@ class ManajemenPeserta extends BaseController
             $sheet3->setCellValue('D'.$rowF, $fb['komentar']);
             
             $cCol = 'E';
-            foreach ($qOrder as $qid) {
-                $val = $fb['jawaban_map'][$qid] ?? '-';
+            foreach ($qOrder as $q) {
+                $val = $fb['jawaban_map'][$q['key']] ?? '-';
                 $sheet3->setCellValue($cCol.$rowF, $val);
                 $cCol++;
             }

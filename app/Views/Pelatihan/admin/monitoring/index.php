@@ -512,6 +512,7 @@
     }
 
     let currentHistoryNik = null;
+    let currentHistoryUser = null;
     const statsGlobal = <?= json_encode($stats) ?>;
 
     function showStatList(title, type) {
@@ -574,6 +575,7 @@
 
     function openHistoryModal(user) {
         currentHistoryNik = user.nik;
+        currentHistoryUser = user;
         document.getElementById('histNama').innerText = user.nama.toUpperCase();
         document.getElementById('histNik').innerText = user.nik;
         document.getElementById('histAvatar').innerText = user.nama.charAt(0).toUpperCase();
@@ -587,46 +589,49 @@
     }
 
     function fetchHistory() {
-        if (!currentHistoryNik) return;
+        if (!currentHistoryUser) return;
 
         let container = document.getElementById('historyListContainer');
-        container.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-danger" role="status"></div></div>';
-
         let year = document.getElementById('histYearFilter').value;
+        
+        container.innerHTML = '';
+        
+        let filtered = currentHistoryUser.history.filter(item => {
+            if (!item.tanggal || item.tanggal === '-') return false;
+            return item.tanggal.endsWith(year);
+        });
 
-        fetch('<?= base_url("pelatihan/admin/monitoring/jpl_history") ?>/' + currentHistoryNik + '?tahun=' + year)
-            .then(res => res.json())
-            .then(data => {
-                container.innerHTML = '';
+        if (filtered.length === 0) {
+            container.innerHTML = `<div class="text-center py-4 text-muted small"><i class="fas fa-folder-open fa-2x mb-2 d-block opacity-25"></i> Tidak ada data riwayat JPL untuk tahun ${year}.</div>`;
+            return;
+        }
 
-                if (data.aktif.length === 0) {
-                    container.innerHTML = `<div class="text-center py-4 text-muted small"><i class="fas fa-folder-open fa-2x mb-2 d-block opacity-25"></i> Tidak ada data riwayat JPL untuk tahun ${year}.</div>`;
-                    return;
-                }
+        filtered.forEach(item => {
+            let namaParts = item.nama.match(/^\[(.*?)\] (.*)$/);
+            let badgeColor = 'bg-primary';
+            let jenisTxt = 'Lainnya';
+            let judul = item.nama;
 
-                // Render Aktif
-                data.aktif.forEach(item => {
-                    let tgl = item.tgl_selesai ? new Date(item.tgl_selesai).toLocaleDateString('id-ID') : '-';
-                    let badgeColor = item.jenis === 'rsud' ? 'bg-danger' : 'bg-primary';
-                    let jenisTxt = item.jenis === 'rsud' ? 'Internal' : 'External';
+            if (namaParts) {
+                jenisTxt = namaParts[1];
+                judul = namaParts[2];
+                if (jenisTxt.includes('Internal')) badgeColor = 'bg-danger';
+                if (jenisTxt.includes('Eksternal')) badgeColor = 'bg-primary';
+            }
 
-                    container.innerHTML += `
-                        <div class="list-group-item px-3 py-2.5 border-bottom border-light">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div class="small fw-bold text-dark text-truncate" style="max-width:70%;" title="${item.judul}">${item.judul}</div>
-                                <span class="badge bg-dark rounded-pill px-2.5 py-1 fw-bold" style="font-size:0.6rem;">+${item.skp} JPL</span>
-                            </div>
-                            <div class="small text-muted mt-1 d-flex justify-content-between align-items-center" style="font-size:0.65rem;">
-                                <span>Tgl: ${tgl}</span>
-                                <span class="badge ${badgeColor} rounded-pill" style="font-size:0.55rem;">${jenisTxt}</span>
-                            </div>
-                        </div>
-                    `;
-                });
-            })
-            .catch(err => {
-                container.innerHTML = `<div class="text-center py-4 text-danger small"><i class="fas fa-exclamation-circle fa-2x mb-2 d-block"></i> Gagal memuat riwayat.</div>`;
-            });
+            container.innerHTML += `
+                <div class="list-group-item px-3 py-2.5 border-bottom border-light">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="small fw-bold text-dark text-truncate" style="max-width:70%;" title="${judul}">${judul}</div>
+                        <span class="badge bg-dark rounded-pill px-2.5 py-1 fw-bold" style="font-size:0.6rem;">+${item.jpl} JPL</span>
+                    </div>
+                    <div class="small text-muted mt-1 d-flex justify-content-between align-items-center" style="font-size:0.65rem;">
+                        <span>Tgl: ${item.tanggal}</span>
+                        <span class="badge ${badgeColor} rounded-pill" style="font-size:0.55rem;">${jenisTxt}</span>
+                    </div>
+                </div>
+            `;
+        });
     }
 
     function openRemindModal(emp) {

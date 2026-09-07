@@ -60,6 +60,38 @@
 
     <div class="col-12">
         
+        <?php // ─── Sesi Stats ──────────────────────────────────────────────── ?>
+        <?php if (!empty($sesiStats)): ?>
+        <div class="mb-4">
+            <h5 class="fw-bold mb-3 text-uppercase"><i class="fas fa-clock me-2 text-info"></i> Rata-rata Penilaian per Sesi</h5>
+            <div class="row g-3">
+                <?php foreach ($sesiStats as $ss): ?>
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-sm rounded-lg p-4 bg-white h-100 border-top border-info border-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="fw-bold mb-0 text-info text-uppercase"><i class="fas fa-users me-2"></i><?= esc($ss['nama']) ?></h6>
+                            <span class="badge rounded-pill px-3 py-2 fw-bold bg-info text-white">
+                                <i class="fas fa-star me-1"></i><?= $ss['avg_overall'] ?> / 5.0
+                            </span>
+                        </div>
+                        <?php foreach ($ss['pertanyaan'] as $pq): ?>
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="small fw-bold text-dark"><?= esc($pq['pertanyaan']) ?></span>
+                                <span class="small fw-bold text-warning"><i class="fas fa-star me-1"></i><?= $pq['avg_rating'] ?> <span class="text-muted fw-normal">(<?= $pq['total_votes'] ?> vote)</span></span>
+                            </div>
+                            <div class="progress" style="height: 6px; border-radius: 10px; background: #e2e8f0;">
+                                <div class="progress-bar bg-info" style="width: <?= ($pq['avg_rating'] / 5) * 100 ?>%"></div>
+                            </div>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+        <hr class="my-4">
+        <?php endif; ?>
 
         <?php // ─── Materi Stats ─────────────────────────────────────────────── ?>
         <?php if (!empty($materiStats)): ?>
@@ -200,35 +232,35 @@
                         </div>
                         
                         <?php if (!empty($fb['jawaban_detail'])): ?>
-                            <div class="row g-4">
-                                <?php foreach ($fb['jawaban_detail'] as $kat => $jawabans): ?>
-                                    <div class="col-md-6">
-                                        <div class="card h-100 border-0 shadow-sm rounded-4">
-                                            <div class="card-header bg-white border-bottom fw-bold text-primary py-3 text-uppercase">
-                                                <i class="fas fa-list-ul me-2"></i> <?= esc($kat) ?>
-                                            </div>
-                                            <div class="card-body p-0">
-                                                <ul class="list-group list-group-flush">
-                                                    <?php foreach ($jawabans as $j): ?>
-                                                    <li class="list-group-item p-3 border-bottom-0 border-light">
-                                                        <?php if (!empty($j['nama_sesi'])): ?>
-                                                            <div class="small fw-bold text-danger mb-1"><i class="fas fa-chalkboard-teacher me-1"></i> Sesi: <?= esc($j['nama_sesi']) ?></div>
-                                                        <?php endif; ?>
-                                                        <div class="small text-dark mb-2"><?= esc($j['pertanyaan']) ?></div>
-                                                        <div class="text-warning small fw-bold">
-                                                            <?php for($i=1; $i<=5; $i++): ?>
-                                                                <i class="<?= $i <= $j['nilai_rating'] ? 'fas' : 'far' ?> fa-star"></i>
-                                                            <?php endfor; ?> 
-                                                            <span class="text-muted ms-1">(<?= $j['nilai_rating'] ?>)</span>
-                                                        </div>
-                                                    </li>
-                                                    <?php endforeach; ?>
-                                                </ul>
+                            <?php foreach ($fb['jawaban_detail'] as $sesi => $kategoriList): ?>
+                                <h6 class="fw-bold mt-4 mb-3 text-danger border-bottom pb-2"><i class="fas fa-clock me-2"></i>Sesi: <?= esc($sesi) ?></h6>
+                                <div class="row g-4 mb-4">
+                                    <?php foreach ($kategoriList as $kat => $jawabans): ?>
+                                        <div class="col-md-6">
+                                            <div class="card h-100 border-0 shadow-sm rounded-4">
+                                                <div class="card-header bg-white border-bottom fw-bold text-primary py-3 text-uppercase">
+                                                    <i class="fas fa-list-ul me-2"></i> <?= esc($kat) ?>
+                                                </div>
+                                                <div class="card-body p-0">
+                                                    <ul class="list-group list-group-flush">
+                                                        <?php foreach ($jawabans as $j): ?>
+                                                        <li class="list-group-item p-3 border-bottom-0 border-light">
+                                                            <div class="small text-dark mb-2"><?= esc($j['pertanyaan']) ?></div>
+                                                            <div class="text-warning small fw-bold">
+                                                                <?php for($i=1; $i<=5; $i++): ?>
+                                                                    <i class="<?= $i <= $j['nilai_rating'] ? 'fas' : 'far' ?> fa-star"></i>
+                                                                <?php endfor; ?> 
+                                                                <span class="text-muted ms-1">(<?= $j['nilai_rating'] ?>)</span>
+                                                            </div>
+                                                        </li>
+                                                        <?php endforeach; ?>
+                                                    </ul>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                <?php endforeach; ?>
-                            </div>
+                                    <?php endforeach; ?>
+                                </div>
+                            <?php endforeach; ?>
                         <?php else: ?>
                             <div class="alert alert-secondary text-center">Detail jawaban kuesioner tidak tersedia.</div>
                         <?php endif; ?>
