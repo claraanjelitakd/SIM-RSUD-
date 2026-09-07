@@ -287,6 +287,7 @@ class ManajemenPeserta extends BaseController
         $totalJPLCapaian = array_sum(array_column($stats, 'jpl'));
         $totalKurangJPL = max(0, $totalTargetJPL - $totalJPLCapaian);
         $totalTidakAktif = count(array_filter($stats, fn($s) => $s['pelatihan'] === 'Belum Ada'));
+        $rataRataJPL = $totalKaryawan > 0 ? $totalJPLCapaian / $totalKaryawan : 0;
 
         $data = [
             'title' => 'Monitoring & Matriks JPL',
@@ -299,9 +300,384 @@ class ManajemenPeserta extends BaseController
             'totalTargetJPL' => $totalTargetJPL,
             'totalJPLCapaian' => $totalJPLCapaian,
             'totalKurangJPL' => $totalKurangJPL,
-            'totalTidakAktif' => $totalTidakAktif
+            'totalTidakAktif' => $totalTidakAktif,
+            'rataRataJPL' => $rataRataJPL
         ];
         return view('Pelatihan/admin/monitoring/index', $data);
+    }
+
+    public function detail_stat($type)
+    {
+        $userModel = new UserPelatihanModel();
+        $pesertaPelatihanModel = new \App\Models\Pelatihan\PesertaPelatihanModel();
+        $db = \Config\Database::connect();
+
+        $selectedYear = $this->request->getVar('tahun') ?? date('Y');
+
+        $dbUsers = $userModel->select('users_pelatihan.*, profesi_pelatihan.nama_profesi as profesi, profesi_pelatihan.kategori_target as kategori_target, profesi_pelatihan.target_jpl as target_jpl_profesi, unit_kerja_pelatihan.nama_unit as ruangan, users_pelatihan.id_profesi')
+            ->join('profesi_pelatihan', 'profesi_pelatihan.id_profesi = users_pelatihan.id_profesi', 'left')
+            ->join('unit_kerja_pelatihan', 'unit_kerja_pelatihan.id_unit_kerja = users_pelatihan.id_unit_kerja', 'left')
+            ->where('users_pelatihan.role', 'peserta')
+            ->findAll();
+
+        $niks = array_column($dbUsers, 'nik');
+        $pelatByUser = [];
+        $certsByUser = [];
+        $fallbackByUser = [];
+        $lastPelatByUser = [];
+        $lastRegByUser = [];
+
+        if (!empty($niks)) {
+            $allCompletedPelat = $pesertaPelatihanModel->select('peserta_pelatihan.user_id, master_pelatihan.jpl, master_pelatihan.nama, master_pelatihan.jadwal_selesai')
+                ->join('master_pelatihan', 'master_pelatihan.id = peserta_pelatihan.pelatihan_id')
+                ->whereIn('peserta_pelatihan.user_id', $niks)
+                ->where('peserta_pelatihan.status_peserta', 'Lulus')
+                ->where('master_pelatihan.cert_published', 1)
+                ->findAll();
+            foreach ($allCompletedPelat as $cp) {
+                $pelatByUser[$cp['user_id']][] = $cp;
+            }
+
+            $allApprovedCerts = $db->table('sertifikat_pelatihan')
+                ->whereIn('user_id', $niks)
+                ->where('verifikasi', 'approved')
+                ->where('jenis_dokumen !=', 'rsud')
+                ->get()->getResultArray();
+            foreach ($allApprovedCerts as $ac) {
+                $certsByUser[$ac['user_id']][] = $ac;
+            }
+
+            $rsudFallbackCerts = $db->table('sertifikat_pelatihan sp')
+                ->select('sp.user_id, sp.skp, sp.tgl_selesai, sp.judul')
+                ->whereIn('sp.user_id', $niks)
+                ->where('sp.verifikasi', 'approved')
+                ->where('sp.jenis_dokumen', 'rsud')
+                ->where("NOT EXISTS (SELECT 1 FROM peserta_pelatihan pp WHERE pp.user_id = sp.user_id AND pp.pelatihan_id = sp.pelatihan_id AND pp.status_peserta = 'Lulus')", null, false)
+                ->get()->getResultArray();
+            foreach ($rsudFallbackCerts as $rc) {
+                $fallbackByUser[$rc['user_id']][] = $rc;
+            }
+
+            $allRegistrations = $pesertaPelatihanModel->select('peserta_pelatihan.*, master_pelatihan.nama as nama_pelatihan')
+                ->join('master_pelatihan', 'master_pelatihan.id = peserta_pelatihan.pelatihan_id')
+                ->whereIn('peserta_pelatihan.user_id', $niks)
+                ->orderBy('peserta_pelatihan.id', 'ASC')
+                ->findAll();
+            foreach ($allRegistrations as $reg) {
+                $lastRegByUser[$reg['user_id']] = $reg;
+                $lastPelatByUser[$reg['user_id']] = $reg['nama_pelatihan'];
+            }
+        }
+
+        $stats = [];
+        foreach ($dbUsers as $u) {
+            $nik = $u['nik'];
+            $lastPelatName = $lastPelatByUser[$nik] ?? 'Belum Ada';
+            $regStatus = isset($lastRegByUser[$nik]) ? $lastRegByUser[$nik]['status_peserta'] : 'Tidak Ada';
+
+            $myCompletedPelat = $pelatByUser[$nik] ?? [];
+            $myApprovedCerts = $certsByUser[$nik] ?? [];
+            $myFallbackCerts = $fallbackByUser[$nik] ?? [];
+
+            $completedJpl = 0;
+            $history = [];
+            foreach ($myCompletedPelat as $cp) {
+                $yearOfTraining = !empty($cp['jadwal_selesai']) ? date('Y', strtotime($cp['jadwal_selesai'])) : date('Y');
+                if ($yearOfTraining == $selectedYear) {
+                    $completedJpl += (int)($cp['jpl'] ?? 0);
+                }
+                $history[] = [
+                    'nama' => '[Internal] ' . $cp['nama'],
+                    'jpl' => $cp['jpl'],
+                    'tanggal' => !empty($cp['jadwal_selesai']) ? date('d M Y', strtotime($cp['jadwal_selesai'])) : '-'
+                ];
+            }
+            foreach ($myApprovedCerts as $ac) {
+                $yearOfTraining = !empty($ac['tgl_selesai']) ? date('Y', strtotime($ac['tgl_selesai'])) : date('Y');
+                if ($yearOfTraining == $selectedYear) {
+                    $completedJpl += (int)($ac['skp'] ?? 0);
+                }
+                $history[] = [
+                    'nama' => '[Eksternal] ' . $ac['judul'],
+                    'jpl' => $ac['skp'],
+                    'tanggal' => !empty($ac['tgl_selesai']) ? date('d M Y', strtotime($ac['tgl_selesai'])) : '-'
+                ];
+            }
+            foreach ($myFallbackCerts as $rc) {
+                $yearOfTraining = !empty($rc['tgl_selesai']) ? date('Y', strtotime($rc['tgl_selesai'])) : date('Y');
+                if ($yearOfTraining == $selectedYear) {
+                    $completedJpl += (int)($rc['skp'] ?? 0);
+                }
+                $history[] = [
+                    'nama' => '[Internal/Fallback] ' . $rc['judul'],
+                    'jpl' => $rc['skp'],
+                    'tanggal' => !empty($rc['tgl_selesai']) ? date('d M Y', strtotime($rc['tgl_selesai'])) : '-'
+                ];
+            }
+
+            $targetJPLKaryawan = $u['target_jpl_profesi'] ?? 20;
+
+            $stats[] = [
+                'nik' => $nik,
+                'nama' => $u['nama_lengkap'],
+                'profesi' => $u['profesi'] ?? '-',
+                'kategori_target' => $u['kategori_target'] ?: 'Non-Named',
+                'divisi' => $u['ruangan'] ?? 'Umum',
+                'pelatihan' => $lastPelatName,
+                'status_reg' => $regStatus,
+                'jpl' => $completedJpl,
+                'target_jpl' => $targetJPLKaryawan,
+                'history' => $history
+            ];
+        }
+
+        $filtered = [];
+        $title = '';
+        switch ($type) {
+            case 'all':
+                $filtered = $stats;
+                $title = 'Semua Karyawan Aktif';
+                break;
+            case 'kurang':
+                $filtered = array_filter($stats, fn($s) => $s['jpl'] < $s['target_jpl']);
+                $title = 'Belum Memenuhi Target';
+                break;
+            case 'cukup':
+                $filtered = array_filter($stats, fn($s) => $s['jpl'] >= $s['target_jpl']);
+                $title = 'Sudah Memenuhi Target';
+                break;
+            case 'tidak_aktif':
+                $filtered = array_filter($stats, fn($s) => $s['pelatihan'] === 'Belum Ada');
+                $title = 'Karyawan Tidak Aktif';
+                break;
+            default:
+                return redirect()->to('/pelatihan/admin/monitoring');
+        }
+        $filtered = array_values($filtered);
+
+        $data = [
+            'title' => $title,
+            'type' => $type,
+            'stats' => $filtered,
+            'selectedYear' => $selectedYear,
+            'totalCount' => count($filtered)
+        ];
+        return view('Pelatihan/admin/monitoring/detail_stat', $data);
+    }
+
+    public function export_jpl_excel()
+    {
+        $userModel = new UserPelatihanModel();
+        $pesertaPelatihanModel = new \App\Models\Pelatihan\PesertaPelatihanModel();
+        $db = \Config\Database::connect();
+
+        $selectedYear = $this->request->getVar('tahun') ?? date('Y');
+
+        $dbUsers = $userModel->select('users_pelatihan.*, profesi_pelatihan.nama_profesi as profesi, profesi_pelatihan.target_jpl as target_jpl_profesi, unit_kerja_pelatihan.nama_unit as ruangan')
+            ->join('profesi_pelatihan', 'profesi_pelatihan.id_profesi = users_pelatihan.id_profesi', 'left')
+            ->join('unit_kerja_pelatihan', 'unit_kerja_pelatihan.id_unit_kerja = users_pelatihan.id_unit_kerja', 'left')
+            ->where('users_pelatihan.role', 'peserta')
+            ->findAll();
+
+        $niks = array_column($dbUsers, 'nik');
+        $pelatByUser = [];
+        $certsByUser = [];
+        $fallbackByUser = [];
+
+        if (!empty($niks)) {
+            $allCompletedPelat = $pesertaPelatihanModel->select('peserta_pelatihan.user_id, master_pelatihan.jpl, master_pelatihan.jadwal_selesai')
+                ->join('master_pelatihan', 'master_pelatihan.id = peserta_pelatihan.pelatihan_id')
+                ->whereIn('peserta_pelatihan.user_id', $niks)
+                ->where('peserta_pelatihan.status_peserta', 'Lulus')
+                ->where('master_pelatihan.cert_published', 1)
+                ->findAll();
+            foreach ($allCompletedPelat as $cp) {
+                $pelatByUser[$cp['user_id']][] = $cp;
+            }
+
+            $allApprovedCerts = $db->table('sertifikat_pelatihan')
+                ->whereIn('user_id', $niks)
+                ->where('verifikasi', 'approved')
+                ->where('jenis_dokumen !=', 'rsud')
+                ->get()->getResultArray();
+            foreach ($allApprovedCerts as $ac) {
+                $certsByUser[$ac['user_id']][] = $ac;
+            }
+
+            $rsudFallbackCerts = $db->table('sertifikat_pelatihan sp')
+                ->select('sp.user_id, sp.skp, sp.tgl_selesai, sp.judul')
+                ->whereIn('sp.user_id', $niks)
+                ->where('sp.verifikasi', 'approved')
+                ->where('sp.jenis_dokumen', 'rsud')
+                ->where("NOT EXISTS (SELECT 1 FROM peserta_pelatihan pp WHERE pp.user_id = sp.user_id AND pp.pelatihan_id = sp.pelatihan_id AND pp.status_peserta = 'Lulus')", null, false)
+                ->get()->getResultArray();
+            foreach ($rsudFallbackCerts as $rc) {
+                $fallbackByUser[$rc['user_id']][] = $rc;
+            }
+        }
+
+        $rows = [];
+        $totalJPL = 0;
+        $totalTarget = 0;
+
+        foreach ($dbUsers as $u) {
+            $nik = $u['nik'];
+            $target = (int)($u['target_jpl_profesi'] ?? 20);
+            $completedJpl = 0;
+
+            foreach (($pelatByUser[$nik] ?? []) as $cp) {
+                $y = !empty($cp['jadwal_selesai']) ? date('Y', strtotime($cp['jadwal_selesai'])) : date('Y');
+                if ($y == $selectedYear) $completedJpl += (int)($cp['jpl'] ?? 0);
+            }
+            foreach (($certsByUser[$nik] ?? []) as $ac) {
+                $y = !empty($ac['tgl_selesai']) ? date('Y', strtotime($ac['tgl_selesai'])) : date('Y');
+                if ($y == $selectedYear) $completedJpl += (int)($ac['skp'] ?? 0);
+            }
+            foreach (($fallbackByUser[$nik] ?? []) as $rc) {
+                $y = !empty($rc['tgl_selesai']) ? date('Y', strtotime($rc['tgl_selesai'])) : date('Y');
+                if ($y == $selectedYear) $completedJpl += (int)($rc['skp'] ?? 0);
+            }
+
+            $totalJPL += $completedJpl;
+            $totalTarget += $target;
+
+            $rows[] = [
+                'nama'    => $u['nama_lengkap'],
+                'nik'     => $nik,
+                'profesi' => $u['profesi'] ?? '-',
+                'ruangan' => $u['ruangan'] ?? '-',
+                'jpl'     => $completedJpl,
+                'target'  => $target,
+            ];
+        }
+
+        usort($rows, fn($a, $b) => strcmp($a['nama'], $b['nama']));
+
+        $count = count($rows);
+        $rataRata = $count > 0 ? round($totalJPL / $count, 1) : 0;
+
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Riwayat JPL Peserta');
+
+        $titleStyle = [
+            'font' => ['bold' => true, 'size' => 14],
+            'alignment' => ['horizontal' => 'center']
+        ];
+        $subtitleStyle = [
+            'font' => ['size' => 11],
+            'alignment' => ['horizontal' => 'center']
+        ];
+        $summaryStyle = [
+            'font' => ['bold' => true, 'size' => 11]
+        ];
+        $headerStyle = [
+            'font' => ['bold' => true, 'size' => 11, 'color' => ['rgb' => 'FFFFFF']],
+            'fill' => ['fillType' => 'solid', 'startColor' => ['rgb' => '212529']],
+            'alignment' => ['horizontal' => 'center', 'vertical' => 'center'],
+            'borders' => ['allBorders' => ['borderStyle' => 'thin', 'color' => ['rgb' => 'DEE2E6']]]
+        ];
+        $cellCenter = [
+            'alignment' => ['horizontal' => 'center'],
+            'borders' => ['allBorders' => ['borderStyle' => 'thin', 'color' => ['rgb' => 'DEE2E6']]]
+        ];
+        $cellLeft = [
+            'borders' => ['allBorders' => ['borderStyle' => 'thin', 'color' => ['rgb' => 'DEE2E6']]]
+        ];
+        $greenFill = [
+            'fill' => ['fillType' => 'solid', 'startColor' => ['rgb' => 'D4EDDA']]
+        ];
+        $yellowFill = [
+            'fill' => ['fillType' => 'solid', 'startColor' => ['rgb' => 'FFF3CD']]
+        ];
+        $redFill = [
+            'fill' => ['fillType' => 'solid', 'startColor' => ['rgb' => 'F8D7DA']]
+        ];
+
+        // Title
+        $sheet->mergeCells('A1:G1');
+        $sheet->setCellValue('A1', 'LAPORAN RIWAYAT JPL PESERTA');
+        $sheet->getStyle('A1')->applyFromArray(['font' => ['bold' => true, 'size' => 14], 'alignment' => ['horizontal' => 'center']]);
+
+        $sheet->mergeCells('A2:G2');
+        $sheet->setCellValue('A2', 'Tahun Evaluasi: ' . $selectedYear);
+        $sheet->getStyle('A2')->applyFromArray($subtitleStyle);
+
+        // Summary
+        $sheet->setCellValue('A4', 'Banyak Karyawan');
+        $sheet->setCellValue('B4', $count . ' orang');
+        $sheet->getStyle('A4')->applyFromArray($summaryStyle);
+
+        $sheet->setCellValue('A5', 'Total Capaian JPL');
+        $sheet->setCellValue('B5', $totalJPL . ' JPL');
+        $sheet->getStyle('A5')->applyFromArray($summaryStyle);
+
+        $sheet->setCellValue('A6', 'Total Target JPL');
+        $sheet->setCellValue('B6', $totalTarget . ' JPL');
+        $sheet->getStyle('A6')->applyFromArray($summaryStyle);
+
+        $sheet->setCellValue('A7', 'Rata-rata JPL');
+        $sheet->setCellValue('B7', $rataRata . ' JPL');
+        $sheet->getStyle('A7')->applyFromArray($summaryStyle);
+        $sheet->getStyle('B7')->applyFromArray(['font' => ['bold' => true, 'size' => 12, 'color' => ['rgb' => '0D6EFD']]]);
+
+        // Helper: convert column index to letter
+        $colLetter = function($n) {
+            $s = '';
+            while ($n > 0) { $n--; $s = chr(65 + ($n % 26)) . $s; $n = intdiv($n, 26); }
+            return $s;
+        };
+
+        // Header row
+        $headers = ['No', 'Nama', 'NIK', 'Profesi', 'Ruangan', 'Capaian JPL', 'Target JPL'];
+        $headerRow = 9;
+        foreach ($headers as $col => $val) {
+            $sheet->setCellValue($colLetter($col + 1) . $headerRow, $val);
+        }
+        $sheet->getStyle('A9:G9')->applyFromArray($headerStyle);
+
+        // Data rows
+        foreach ($rows as $i => $r) {
+            $row = $headerRow + 1 + $i;
+            $pct = $r['target'] > 0 ? round(($r['jpl'] / $r['target']) * 100) : 0;
+
+            $sheet->setCellValue('A' . $row, $i + 1);
+            $sheet->setCellValue('B' . $row, $r['nama']);
+            $sheet->setCellValue('C' . $row, $r['nik']);
+            $sheet->setCellValue('D' . $row, $r['profesi']);
+            $sheet->setCellValue('E' . $row, $r['ruangan']);
+            $sheet->setCellValue('F' . $row, $r['jpl']);
+            $sheet->setCellValue('G' . $row, $r['target']);
+
+            // Apply borders to entire row
+            $sheet->getStyle('A' . $row . ':G' . $row)->applyFromArray($cellLeft);
+
+            // Center columns: No, Capaian JPL, Target JPL
+            $sheet->getStyle('A' . $row)->applyFromArray($cellCenter);
+            $sheet->getStyle('F' . $row)->applyFromArray($cellCenter);
+            $sheet->getStyle('G' . $row)->applyFromArray($cellCenter);
+
+            // Color the JPL cell
+            $fill = $r['jpl'] >= $r['target'] ? $greenFill : ($pct >= 50 ? $yellowFill : $redFill);
+            $sheet->getStyle('F' . $row)->applyFromArray($fill);
+        }
+
+        // Auto width
+        $sheet->getColumnDimension('A')->setWidth(6);
+        $sheet->getColumnDimension('B')->setWidth(30);
+        $sheet->getColumnDimension('C')->setWidth(18);
+        $sheet->getColumnDimension('D')->setWidth(22);
+        $sheet->getColumnDimension('E')->setWidth(22);
+        $sheet->getColumnDimension('F')->setWidth(15);
+        $sheet->getColumnDimension('G')->setWidth(15);
+
+        $fileName = 'Riwayat_JPL_Peserta_' . $selectedYear . '.xlsx';
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="' . $fileName . '"');
+        header('Cache-Control: max-age=0');
+        $writer->save('php://output');
+        exit;
     }
 
     public function set_target($userId)

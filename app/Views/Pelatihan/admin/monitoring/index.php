@@ -11,6 +11,7 @@
  * @var int $totalTargetJPL
  * @var int $totalJPLCapaian
  * @var int $totalKurangJPL
+ * @var float|int $rataRataJPL
  */
 ?>
 
@@ -32,8 +33,8 @@
     $cukup = count(array_filter($stats, fn($p) => $p['jpl'] >= $p['target_jpl']));
     ?>
     <div class="row mb-4 g-3">
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm rounded-custom bg-white h-100" style="cursor:pointer;" onclick="showStatList('Semua Karyawan Aktif', 'all')">
+        <div class="col-md-4 col-xl">
+            <div class="card border-0 shadow-sm rounded-custom bg-white h-100" style="cursor:pointer;" onclick="window.location.href='<?= site_url("pelatihan/admin/monitoring/detail_stat/all?tahun=$selectedYear") ?>'">
                 <div class="card-body d-flex align-items-center justify-content-between">
                     <div>
                         <h6 class="text-muted mb-1 fw-bold" style="font-size: 0.65rem;">TOTAL KARYAWAN AKTIF</h6>
@@ -43,8 +44,8 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm rounded-custom bg-white h-100 border-bottom border-danger border-3" style="cursor:pointer;" onclick="showStatList('Belum Memenuhi Target', 'kurang')">
+        <div class="col-md-4 col-xl">
+            <div class="card border-0 shadow-sm rounded-custom bg-white h-100 border-bottom border-danger border-3" style="cursor:pointer;" onclick="window.location.href='<?= site_url("pelatihan/admin/monitoring/detail_stat/kurang?tahun=$selectedYear") ?>'">
                 <div class="card-body d-flex align-items-center justify-content-between">
                     <div>
                         <h6 class="text-muted mb-1 fw-bold" style="font-size: 0.65rem;">BELUM MEMENUHI TARGET</h6>
@@ -54,8 +55,8 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm rounded-custom bg-white h-100 border-bottom border-dark border-3" style="cursor:pointer;" onclick="showStatList('Sudah Memenuhi Target', 'cukup')">
+        <div class="col-md-4 col-xl">
+            <div class="card border-0 shadow-sm rounded-custom bg-white h-100 border-bottom border-dark border-3" style="cursor:pointer;" onclick="window.location.href='<?= site_url("pelatihan/admin/monitoring/detail_stat/cukup?tahun=$selectedYear") ?>'">
                 <div class="card-body d-flex align-items-center justify-content-between">
                     <div>
                         <h6 class="text-muted mb-1 fw-bold" style="font-size: 0.65rem;">SUDAH MEMENUHI TARGET</h6>
@@ -65,14 +66,25 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm rounded-custom bg-white h-100 border-bottom border-light border-3" style="cursor:pointer;" onclick="showStatList('Karyawan Tidak Aktif', 'tidak_aktif')">
+        <div class="col-md-4 col-xl">
+            <div class="card border-0 shadow-sm rounded-custom bg-white h-100 border-bottom border-light border-3" style="cursor:pointer;" onclick="window.location.href='<?= site_url("pelatihan/admin/monitoring/detail_stat/tidak_aktif?tahun=$selectedYear") ?>'">
                 <div class="card-body d-flex align-items-center justify-content-between">
                     <div>
                         <h6 class="text-muted mb-1 fw-bold" style="font-size: 0.65rem;">KARYAWAN TIDAK AKTIF</h6>
                         <h3 class="mb-0 fw-bold text-secondary"><?= $totalTidakAktif ?> <span class="fs-6 text-muted fw-normal">Orang</span></h3>
                     </div>
                     <div class="bg-light text-secondary p-3 rounded-circle d-flex align-items-center justify-content-center" style="width:48px; height:48px;"><i class="fas fa-user-slash"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 col-xl">
+            <div class="card border-0 shadow-sm rounded-custom bg-white h-100 border-bottom border-info border-3" style="cursor:pointer;" onclick="window.location.href='<?= site_url("pelatihan/admin/monitoring/export_jpl_excel?tahun=$selectedYear") ?>'">
+                <div class="card-body d-flex align-items-center justify-content-between">
+                    <div>
+                        <h6 class="text-muted mb-1 fw-bold" style="font-size: 0.65rem;">RATA RATA JPL</h6>
+                        <h3 class="mb-0 fw-bold text-info"><?= number_format($rataRataJPL, 1) ?> <span class="fs-6 text-muted fw-normal">JPL</span></h3>
+                    </div>
+                    <div class="bg-light text-info p-3 rounded-circle d-flex align-items-center justify-content-center" style="border: 1px solid #dee2e6; width:48px; height:48px;"><i class="fas fa-file-excel text-info"></i></div>
                 </div>
             </div>
         </div>

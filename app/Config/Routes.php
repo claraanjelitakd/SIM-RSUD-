@@ -319,6 +319,8 @@ $routes->group('pelatihan/admin', ['namespace' => 'App\Controllers\Pelatihan\Adm
     $routes->get('akun_peserta/toggle-status/(:any)', 'ManajemenPeserta::toggle_status/$1');
     $routes->get('akun_peserta/delete/(:any)', 'ManajemenPeserta::delete_akun/$1');
     $routes->get('monitoring', 'ManajemenPeserta::index');
+    $routes->get('monitoring/detail_stat/(:any)', 'ManajemenPeserta::detail_stat/$1');
+    $routes->get('monitoring/export_jpl_excel', 'ManajemenPeserta::export_jpl_excel');
     $routes->get('monitoring/jpl_history/(:any)', 'ManajemenPeserta::jpl_history/$1');
     // Verifikasi Pendaftaran
     $routes->get('verifikasi_pendaftaran', 'VerifikasiPendaftaran::index');
